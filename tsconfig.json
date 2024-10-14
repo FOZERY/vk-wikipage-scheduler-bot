@@ -1,0 +1,28 @@
+{ 
+	"include": ["src/**/*.ts"],  
+	"exclude": ["**/*.test.*", "**/__mocks__/*", "**/__tests__/*", "node_modules"],
+	"compilerOptions": {
+	  "target": "ESNext",
+	  "module": "NodeNext", 
+	  "moduleResolution": "NodeNext",  
+	  "esModuleInterop": true,
+	  "declaration": true,
+	  "removeComments": true, 
+	  "emitDecoratorMetadata": true,
+	  "experimentalDecorators": true,
+	  "allowSyntheticDefaultImports": true,
+	  "sourceMap": true,
+	  "outDir": "./build",
+	  "baseUrl": "./",  
+	  "paths": { 
+		"app/*": ["./src/app/*"] 
+	  },  
+	  "incremental": true,
+	  "skipLibCheck": true, 
+	  "noImplicitAny": true,  
+	  "strictBindCallApply": true,
+	  "forceConsistentCasingInFileNames": false,
+	  "noFallthroughCasesInSwitch": true
+	}
+  }
+       
