@@ -8,7 +8,7 @@
     "clean": "rimraf build",
     "build": "npm run clean && tsc",
     "start": "start ./build/index.js",
-    "start:dev": "tsx ./src/index.ts"
+    "start:dev": "tsx --watch ./src/index.ts"
   },
   "keywords": [],
   "author": "",
