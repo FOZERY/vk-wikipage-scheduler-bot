@@ -1,34 +1,31 @@
 {
-  "name": "bot-vk-node",
+  "name": "bot-vk-node-ts",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "type": "module",
   "scripts": {
-    "clean": "rimraf build",
-    "build": "npm run clean && tsc",
-    "start": "start ./build/index.js",
-    "start:dev": "tsx --watch ./src/index.ts"
+    "clean": "rm -rf dist",
+    "initdb:dev": "NODE_ENV=development node --experimental-sqlite ./database/migrations/initDB.js",
+    "initdb:prod": "NODE_ENV=production node --experimental-sqlite ./database/migrations/initDB.js",
+    "build": "pnpm clean && tsc --project ./tsconfig.build.json",
+    "watch:dev": "tsx --env-file=./env/.development.env --watch --experimental-sqlite ./src/index.ts",
+    "pretest": "tsc --noEmit",
+    "test": "tsx --no-warnings --test ./src/**/*.test.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@eslint/js": "^9.12.0",
-    "@types/node": "^22.7.5",
-    "dotenv": "^16.4.5",
-    "eslint": "^9.12.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "globals": "^15.11.0",
-    "prettier": "^3.3.3",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.3",
-    "typescript-eslint": "^8.9.0"
+    "@types/node": "^22.10.10",
+    "dayjs": "^1.11.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
   },
   "dependencies": {
     "@vk-io/hear": "^1.1.1",
     "@vk-io/scenes": "^1.2.1",
+    "@vk-io/session": "^2.2.1",
+    "neverthrow": "^8.1.1",
     "vk-io": "^4.9.1"
   }
 }
