@@ -1,18 +1,17 @@
 import dayjs from 'dayjs';
-import 'dayjs/locale/ru	';
 import { Keyboard } from 'vk-io';
 
 export const setDateKeyboard = (() => {
 	const keyboard = Keyboard.builder();
 
-	let now = dayjs().startOf('D');
+	let now = dayjs().tz().startOf('D');
 	for (let i = 0; i < 5; i++) {
 		for (let j = 0; j < 5; j++) {
 			keyboard.textButton({
-				label: now.locale('ru').format('DD.MM.YY'),
+				label: now.format('DD.MM.YY'),
 				color: Keyboard.POSITIVE_COLOR,
 				payload: {
-					date: now,
+					date: now.toDate(),
 				},
 			});
 			now = now.add(1, 'day');
@@ -23,7 +22,7 @@ export const setDateKeyboard = (() => {
 		label: `Отмена`,
 		color: Keyboard.NEGATIVE_COLOR,
 		payload: {
-			command: `quit`,
+			command: `leave`,
 		},
 	});
 

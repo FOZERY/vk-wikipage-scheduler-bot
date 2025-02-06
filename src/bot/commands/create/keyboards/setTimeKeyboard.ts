@@ -1,14 +1,25 @@
+import dayjs, { Dayjs } from 'dayjs';
 import { Keyboard } from 'vk-io';
+
+type TimePayload = {
+	time: {
+		startTime: string | null;
+		endTime: string | null;
+	};
+};
 
 // Функция для создания кнопок с временем
 const createTimeButtons = (startHour: number, endHour: number) => {
 	const buttons = [];
 	for (let hour = startHour; hour <= endHour; hour++) {
-		const time = `${String(hour).padStart(2, '0')}:00`; // Форматируем время в "HH:00"
+		const time = dayjs().hour(hour).startOf('h');
+		const timeString = time.format('HH:mm');
 		buttons.push(
 			Keyboard.textButton({
-				label: time,
-				payload: { time: { startTime: time, endTime: null } },
+				label: timeString,
+				payload: {
+					time: { startTime: timeString, endTime: null },
+				} as TimePayload,
 			})
 		);
 	}
@@ -22,13 +33,18 @@ export const setTimeKeyboard = Keyboard.keyboard([
 	createTimeButtons(15, 19),
 	createTimeButtons(20, 23),
 	Keyboard.textButton({
+		label: 'Без времени',
+		color: Keyboard.PRIMARY_COLOR,
+		payload: { time: { startTime: null, endTime: null } } as TimePayload,
+	}),
+	Keyboard.textButton({
 		label: 'Назад',
 		color: Keyboard.NEGATIVE_COLOR,
-		payload: { command: 'back' },
+		payload: { command: 'previous' },
 	}),
 	Keyboard.textButton({
 		label: 'Отмена',
 		color: Keyboard.NEGATIVE_COLOR,
-		payload: { command: 'quit' },
+		payload: { command: 'leave' },
 	}),
 ]);

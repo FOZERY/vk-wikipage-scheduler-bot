@@ -1,17 +1,15 @@
 import { mainMenuKeyboard } from '../../../../../common/keyboards/mainMenuKeyboard.js';
 import { mainMenuMessage } from '../../../../../common/messages/mainMenuMessage.js';
 import { createSceneStep } from '../../../../../utils/createSceneStep.js';
-import { parseDateString } from '../../../../../utils/parseDateString.js';
-import { setDateKeyboard } from '../../../keyboards/setDateKeyboard.js';
+import { setTitleKeyboard } from '../../../keyboards/setTitleKeyboard.js';
 import { SceneCreateEventState } from '../index.js';
 
-export const dateStep = createSceneStep<SceneCreateEventState>(
+export const titleStep = createSceneStep<SceneCreateEventState>(
 	async (context) => {
 		if (context.scene.step.firstTime) {
-			return await context.send(
-				`Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.`,
-				{ keyboard: setDateKeyboard }
-			);
+			return await context.send(`Введи название события`, {
+				keyboard: setTitleKeyboard,
+			});
 		}
 
 		if (!context.text) {
@@ -23,26 +21,29 @@ export const dateStep = createSceneStep<SceneCreateEventState>(
 		if (context.hasMessagePayload) {
 			// если ввели с клавиатуры
 			switch (context.messagePayload.command) {
+				case 'previous': {
+					return await context.scene.step.previous();
+				}
 				case 'leave': {
-					context.scene.leave();
+					await context.scene.leave();
 					return await context.send(mainMenuMessage, {
 						keyboard: mainMenuKeyboard,
 					});
 				}
 				default: {
-					context.scene.state.date = context.messagePayload.date;
 					break;
 				}
 			}
 		} else {
 			// если ввели текст
-			const trimmedText = context.text.trim();
-			const result = parseDateString(trimmedText);
-			if (result.isErr()) {
-				return await context.reply('Неправильный формат даты.');
+			const parsedTitle = context.text.trim();
+			if (parsedTitle.length > 255) {
+				return await context.reply(
+					`Слишком длинное название для события`
+				);
 			}
 
-			context.scene.state.date = result.value;
+			context.scene.state.title = parsedTitle;
 		}
 
 		return await context.scene.step.next();

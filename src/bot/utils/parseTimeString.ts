@@ -5,31 +5,35 @@ export function parseTimeString(input: string) {
 	const timeRangeRegex = /(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/;
 	const singleTimeRegex = /(\d{2}:\d{2})/;
 
-	let startTime, endTime;
+	let startTimeString, endTimeString: string | null;
 
 	if (timeRangeRegex.test(input)) {
 		// Если введен промежуток времени
 		const [, rawStartTime, rawEndTime] = input.match(timeRangeRegex)!;
 
-		startTime = dayjs(rawStartTime, 'HH:mm', true);
-		endTime = dayjs(rawEndTime, 'HH:mm', true);
+		const startTime = dayjs(rawStartTime, 'HH:mm', true);
+		const endTime = dayjs(rawEndTime, 'HH:mm', true);
 
-		if (!endTime || !startTime) {
+		if (!endTime.isValid() || !startTime.isValid()) {
 			return err('Invalid time');
 		}
+
+		startTimeString = startTime.format('HH:mm');
+		endTimeString = endTime.format('HH:mm');
 	} else if (singleTimeRegex.test(input)) {
 		// Если введено только время начала
 		const [, rawStartTime] = input.match(singleTimeRegex)!;
 
-		startTime = dayjs(rawStartTime, 'HH:mm', true);
-		if (!startTime) {
+		const startTime = dayjs(rawStartTime, 'HH:mm', true);
+		if (!startTime.isValid()) {
 			return err('Invalid time');
 		}
 
-		endTime = null;
+		startTimeString = startTime.format('HH:mm');
+		endTimeString = null;
 	} else {
 		return err('Invalid type of time');
 	}
 
-	return ok({ startTime, endTime });
+	return ok({ startTimeString, endTimeString });
 }

@@ -1,17 +1,15 @@
 import { mainMenuKeyboard } from '../../../../../common/keyboards/mainMenuKeyboard.js';
 import { mainMenuMessage } from '../../../../../common/messages/mainMenuMessage.js';
 import { createSceneStep } from '../../../../../utils/createSceneStep.js';
-import { parseDateString } from '../../../../../utils/parseDateString.js';
-import { setDateKeyboard } from '../../../keyboards/setDateKeyboard.js';
+import { setOgranizerKeyboard } from '../../../keyboards/setOrganizerKeyboard.js';
 import { SceneCreateEventState } from '../index.js';
 
-export const dateStep = createSceneStep<SceneCreateEventState>(
+export const organizerStep = createSceneStep<SceneCreateEventState>(
 	async (context) => {
 		if (context.scene.step.firstTime) {
-			return await context.send(
-				`Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.`,
-				{ keyboard: setDateKeyboard }
-			);
+			return await context.send(`Введи имя организатора`, {
+				keyboard: setOgranizerKeyboard,
+			});
 		}
 
 		if (!context.text) {
@@ -23,26 +21,27 @@ export const dateStep = createSceneStep<SceneCreateEventState>(
 		if (context.hasMessagePayload) {
 			// если ввели с клавиатуры
 			switch (context.messagePayload.command) {
+				case 'previous': {
+					return await context.scene.step.previous();
+				}
 				case 'leave': {
-					context.scene.leave();
+					await context.scene.leave();
 					return await context.send(mainMenuMessage, {
 						keyboard: mainMenuKeyboard,
 					});
 				}
 				default: {
-					context.scene.state.date = context.messagePayload.date;
 					break;
 				}
 			}
 		} else {
 			// если ввели текст
-			const trimmedText = context.text.trim();
-			const result = parseDateString(trimmedText);
-			if (result.isErr()) {
-				return await context.reply('Неправильный формат даты.');
+			const parsedOrganizer = context.text.trim();
+			if (parsedOrganizer.length > 255) {
+				return await context.reply(`Слишком длинное имя организатора`);
 			}
 
-			context.scene.state.date = result.value;
+			context.scene.state.organizer = parsedOrganizer;
 		}
 
 		return await context.scene.step.next();

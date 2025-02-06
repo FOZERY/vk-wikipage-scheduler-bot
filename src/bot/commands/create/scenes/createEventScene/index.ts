@@ -1,14 +1,17 @@
 import { StepScene } from '@vk-io/scenes';
-import { Dayjs } from 'dayjs';
 
+import { confirmStep } from './steps/confirmStep.js';
 import { dateStep } from './steps/dateStep.js';
+import { organizerStep } from './steps/organizerStep.js';
+import { placeStep } from './steps/placeStep.js';
 import { timeStep } from './steps/timeStep.js';
+import { titleStep } from './steps/titleStep.js';
 
 export type SceneCreateEventState = {
-	date: Dayjs;
+	date: Date; // YYYY-MM-DD
 	time: {
-		startTime: Dayjs | null;
-		endTime: Dayjs | null;
+		startTime: string | null; // HH:mm
+		endTime: string | null; // HH:mm
 	};
 	place: string;
 	organizer: string;
@@ -18,4 +21,8 @@ export type SceneCreateEventState = {
 export const sceneCreateEvent = new StepScene('createEventScene', [
 	dateStep,
 	timeStep,
+	placeStep,
+	titleStep,
+	organizerStep,
+	confirmStep,
 ]);

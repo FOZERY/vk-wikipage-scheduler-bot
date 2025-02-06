@@ -22,6 +22,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
     "@vk-io/hear": "^1.1.1",
     "@vk-io/scenes": "^1.2.1",
     "@vk-io/session": "^2.2.1",

@@ -1,8 +1,7 @@
+import { mainMenuKeyboard } from '../../../../../common/keyboards/mainMenuKeyboard.js';
+import { mainMenuMessage } from '../../../../../common/messages/mainMenuMessage.js';
+import { createSceneStep } from '../../../../../utils/createSceneStep.js';
 import { parseTimeString } from '../../../../../utils/parseTimeString.js';
-import {
-	createSceneStep,
-	isKeyboardAction,
-} from '../../../../../utils/utils.js';
 import { setTimeKeyboard } from '../../../keyboards/setTimeKeyboard.js';
 import { SceneCreateEventState } from '../index.js';
 
@@ -28,13 +27,16 @@ export const timeStep = createSceneStep<SceneCreateEventState>(
 			);
 		}
 
-		if (isKeyboardAction(context)) {
+		if (context.hasMessagePayload) {
 			switch (context.messagePayload.command) {
-				case 'quit': {
+				case 'leave': {
 					// TODO: прикрепить клаву сюды
-					return await context.scene.leave();
+					context.scene.leave();
+					return await context.send(mainMenuMessage, {
+						keyboard: mainMenuKeyboard,
+					});
 				}
-				case 'back': {
+				case 'previous': {
 					return await context.scene.step.previous();
 				}
 				default: {
@@ -52,17 +54,16 @@ export const timeStep = createSceneStep<SceneCreateEventState>(
 				};
 			} else {
 				const result = parseTimeString(trimmedText);
+				console.log(result);
 				if (result.isErr()) {
 					return await context.reply('Неверный формат времени');
 				}
 				context.scene.state.time = {
-					startTime: result.value.startTime,
-					endTime: result.value.endTime,
+					startTime: result.value.startTimeString,
+					endTime: result.value.endTimeString,
 				};
 			}
 		}
-
-		console.log(context.scene.state);
 
 		return await context.scene.step.next();
 	}
