@@ -1,54 +1,45 @@
-import './bot/init/dayjs-setup.js';
+import './shared/utils/dayjs.init.js';
 
-import { createClient } from '@supabase/supabase-js';
 import { HearManager } from '@vk-io/hear';
-import { SceneContext, SceneManager } from '@vk-io/scenes';
+import { SceneManager } from '@vk-io/scenes';
 import { SessionManager } from '@vk-io/session';
-import { MessageContext, VK } from 'vk-io';
-import { createEventCommand } from './bot/commands/create/index.js';
-import { sceneCreateEvent } from './bot/commands/create/scenes/createEventScene/index.js';
-import { mainMenuKeyboard } from './bot/common/keyboards/mainMenuKeyboard.js';
-import { mainMenuMessage } from './bot/common/messages/mainMenuMessage.js';
-import { onFallbackMessage } from './bot/common/messages/onFallbackMessage.js';
-import { Database } from './db/supabase/supabase.types.js';
+import { API, VK } from 'vk-io';
 
-export const supabase = createClient<Database>(
-	process.env.SUPABASE_URL as string,
-	process.env.SUPABASE_API_KEY as string
-);
+import { addEventCommand } from './modules/events/commands/addEvent.command.js';
+import { deleteEventCommand } from './modules/events/commands/deleteEvent.command.js';
+import { addEventScene } from './modules/events/scenes/add-event/add-event.scene.js';
+import { deleteEventScene } from './modules/events/scenes/delete-event/deleteEvent.scene.js';
+import { mainMenuKeyboard } from './shared/keyboards/mainMenu.keyboard.js';
+import { mainMenuMessage } from './shared/messages/mainMenu.message.js';
+import { onFallbackMessage } from './shared/messages/onFallback.message..js';
+import { preventChatMiddleware } from './shared/middlewares/preventChat.middleware.js';
+import { preventOutboxMiddleware } from './shared/middlewares/preventOutbox.middleware.js';
+import { MessageContextWithScene } from './shared/types/context.type.js';
 
-const vk = new VK({
+export const vk = new VK({
 	token: process.env.LONGPOLL_TOKEN ?? '',
 });
-
-export type MessageContextWithScene = MessageContext & {
-	scene: SceneContext<any>;
-};
+export const vkUserApi = new API({
+	token: process.env.USER_TOKEN ?? '',
+});
 
 const hearManager = new HearManager<MessageContextWithScene>();
 const sessionManager = new SessionManager();
 const sceneManager = new SceneManager();
 
-vk.updates.on('message', [
-	async (context, next) => {
-		if (context.isOutbox || context.isChat) {
-			return;
-		}
-
-		await next();
-	},
-]);
+vk.updates.on('message', [preventOutboxMiddleware, preventChatMiddleware]);
 vk.updates.on('message_new', sessionManager.middleware);
 vk.updates.on('message_new', sceneManager.middleware);
 vk.updates.on('message_new', sceneManager.middlewareIntercept);
 vk.updates.on('message_new', hearManager.middleware);
 
-sceneManager.addScenes([sceneCreateEvent]);
+// TODO: куда-то вынести хз??
+sceneManager.addScenes([addEventScene, deleteEventScene]);
 
 hearManager.hear(
-	[{ 'messagePayload.command': 'createEvent' }, { text: '/create' }],
+	[{ 'messagePayload.command': 'createEvent' }, { text: '/add' }],
 	async (context) => {
-		await createEventCommand(context);
+		await addEventCommand(context);
 	}
 );
 hearManager.hear(
@@ -58,9 +49,9 @@ hearManager.hear(
 	}
 );
 hearManager.hear(
-	[{ 'messagePayload.command': 'deleteEvent' }, { text: '/update' }],
+	[{ 'messagePayload.command': 'deleteEvent' }, { text: '/delete' }],
 	async (context) => {
-		// await createEventCommand(context);
+		await deleteEventCommand(context);
 	}
 );
 hearManager.hear(
@@ -75,7 +66,6 @@ hearManager.hear(
 		});
 	}
 );
-
 hearManager.onFallback(async (context) => {
 	await context.send(onFallbackMessage, {
 		keyboard: mainMenuKeyboard,
