@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { err, ok } from 'neverthrow';
-import { ScheduleRenderer } from '../../external/vk/schedule/schedule-renderer.js';
+import { ScheduleRenderer } from '../../external/vk/api/wiki/schedule/schedule-renderer.js';
 import {
 	CreateEventDTO,
 	FindCollisionsByDateTimePlaceDTO,
@@ -13,6 +13,7 @@ import { EventsRepository } from './events.repository.js';
 
 export class EventsController {
 	constructor(
+		private readonly scheduleRenderer: ScheduleRenderer,
 		private readonly eventsRepository: EventsRepository,
 		private readonly db: PostgresJsDatabase
 	) {}
@@ -174,10 +175,10 @@ export class EventsController {
 					}
 
 					const eventsForRender = getEventsByDateRangeResult.value;
-					const scheduleRenderer = new ScheduleRenderer(54554866);
-					const renderResult = await scheduleRenderer.renderSchedule(
-						eventsForRender
-					);
+					const renderResult =
+						await this.scheduleRenderer.renderSchedule(
+							eventsForRender
+						);
 
 					if (renderResult.isErr()) {
 						throw renderResult.error;

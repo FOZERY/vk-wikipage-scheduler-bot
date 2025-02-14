@@ -1,11 +1,16 @@
 import dayjs from 'dayjs';
 import { err, ok, Result } from 'neverthrow';
-import { EventEntity } from '../../../modules/events/event.entity.js';
-import { timeRangeToStringOutput } from '../bot/shared/utils/time-utils.js';
-import { vkUserApi } from '../vk-user-api.js';
+import { EventEntity } from '../../../../../modules/events/event.entity.js';
+import { timeRangeToStringOutput } from '../../../bot/shared/utils/time-utils.js';
+import { vkUserApi } from '../../../vk-user-api.js';
+
+export type ScheduleRendererConfig = {
+	pageId: number;
+	groupId: number;
+};
 
 export class ScheduleRenderer {
-	constructor(private readonly pageId: number) {}
+	constructor(private readonly config: ScheduleRendererConfig) {}
 
 	private generateSchedule(events: EventEntity[]): string {
 		let newSchedule = events.reduce((acc, event) => {
@@ -30,8 +35,8 @@ export class ScheduleRenderer {
 
 			await vkUserApi.pages.save({
 				text: schedule,
-				page_id: this.pageId,
-				group_id: 224730953,
+				page_id: this.config.pageId,
+				group_id: this.config.groupId,
 			});
 
 			return ok(undefined);

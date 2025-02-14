@@ -1,9 +1,5 @@
 import { MessageContext } from 'vk-io';
-import { EventsController } from '../../../../../../modules/events/events.controller.js';
-import { EventsRepositoryImpl } from '../../../../../../modules/events/external/db/drizzle/events.repository.impl.js';
 import { eventsController } from '../../../../../../modules/events/index.js';
-import { db } from '../../../../../db/drizzle/index.js';
-import { scheduleRenderer } from '../../../../schedule/index.js';
 import { mainMenuKeyboard } from '../../../shared/keyboards/mainMenu.keyboard.js';
 import { mainMenuMessage } from '../../../shared/messages/mainMenu.message.js';
 import { createScene } from '../../../shared/utils/scene-utils.js';
@@ -22,7 +18,6 @@ export const deleteEventScene = createScene<
 >(EVENT_SCENE_NAMES.deleteEvent, [findEventStep, confirmStep], {
 	dependencies: {
 		eventsController: eventsController,
-		scheduleRenderer: scheduleRenderer,
 	},
 	leaveHandler: async (context) => {
 		return await context.send(mainMenuMessage, {

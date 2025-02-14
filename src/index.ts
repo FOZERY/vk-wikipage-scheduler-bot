@@ -41,6 +41,7 @@ vk.hear(
 			},
 			`ADD_EVENT COMMAND from user ${context.senderId}`
 		);
+		throw new Error();
 		await addEventCommand(context);
 	}
 );
@@ -109,12 +110,12 @@ vk.hear(
 			},
 			`START COMMAND from user ${context.senderId}`
 		);
-		throw new Error();
 		await context.send(mainMenuMessage, {
 			keyboard: mainMenuKeyboard,
 		});
 	}
 );
+
 vk.hearOnFallback(async (context) => {
 	logger.warn(
 		{
