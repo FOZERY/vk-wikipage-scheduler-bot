@@ -1,4 +1,4 @@
-{ 
+{
   "name": "bot-vk-node-ts",
   "version": "1.0.0",
   "description": "",
@@ -8,7 +8,7 @@
     "initdb:dev": "NODE_ENV=development node --experimental-sqlite ./database/migrations/initDB.js",
     "initdb:prod": "NODE_ENV=production node --experimental-sqlite ./database/migrations/initDB.js",
     "build": "pnpm clean && tsc --project ./tsconfig.build.json",
-    "watch:dev": "tsx --env-file=./env/.development.env --watch --experimental-sqlite ./src/index.ts",
+    "watch:dev": "tsx --env-file=./env/.development.env --watch ./src/index.ts",
     "pretest": "tsc --noEmit",
     "type-check": "tsc --noEmit",
     "test": "tsx --no-warnings --test ./src/**/*.test.ts"
@@ -30,6 +30,7 @@
     "@vk-io/session": "^2.2.1",
     "drizzle-orm": "^0.39.2",
     "neverthrow": "^8.1.1",
+    "pino": "^9.6.0",
     "postgres": "^3.4.5",
     "vk-io": "^4.9.1"
   }
