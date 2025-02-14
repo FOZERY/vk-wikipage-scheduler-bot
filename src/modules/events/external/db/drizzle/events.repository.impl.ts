@@ -22,9 +22,9 @@ import { eventsTable } from '../../../../../external/db/drizzle/schema.js';
 import {
 	FindCollisionsByDateTimePlaceDTO,
 	GetEventsByDateRangeDTO,
-} from '../../../dto/event.dto.js';
+} from '../../../event.dto.js';
 import { EventEntity } from '../../../event.entity.js';
-import { EventsRepository } from '../../../repo/events.repository.js';
+import { EventsRepository } from '../../../events.repository.js';
 
 export class EventsRepositoryImpl implements EventsRepository {
 	constructor(private readonly db: PostgresJsDatabase) {}

@@ -1,7 +1,7 @@
 import { MessageContext } from 'vk-io';
 import { EventsController } from '../../../../../../modules/events/events.controller.js';
-import { eventsController } from '../../../../../../modules/events/export.js';
 import { EventsRepositoryImpl } from '../../../../../../modules/events/external/db/drizzle/events.repository.impl.js';
+import { eventsController } from '../../../../../../modules/events/index.js';
 import { db } from '../../../../../db/drizzle/index.js';
 import { scheduleRenderer } from '../../../../schedule/index.js';
 import { mainMenuKeyboard } from '../../../shared/keyboards/mainMenu.keyboard.js';

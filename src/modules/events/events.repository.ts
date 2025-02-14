@@ -2,8 +2,8 @@ import { Result } from 'neverthrow';
 import {
 	FindCollisionsByDateTimePlaceDTO,
 	GetEventsByDateRangeDTO,
-} from '../dto/event.dto.js';
-import { EventEntity } from '../event.entity.js';
+} from './event.dto.js';
+import { EventEntity } from './event.entity.js';
 
 export interface EventsRepository {
 	findEventsByTitleOrDate(

@@ -22,6 +22,10 @@ vk.addScenes([addEventScene, deleteEventScene]);
 vk.hear(
 	[{ 'messagePayload.command': 'createEvent' }, { text: '/add' }],
 	async (context) => {
+		logger.debug(
+			context,
+			`ADD_EVENT COMMAND from user ${context.senderId}`
+		);
 		logger.info(
 			{
 				eventType: context.eventType,
@@ -35,7 +39,7 @@ vk.hear(
 				createdAt: context.createdAt,
 				updatedAt: context.updatedAt,
 			},
-			`ADD_EVENT COMMAND FROM USER ${context.senderId}`
+			`ADD_EVENT COMMAND from user ${context.senderId}`
 		);
 		await addEventCommand(context);
 	}
@@ -57,7 +61,7 @@ vk.hear(
 				createdAt: context.createdAt,
 				updatedAt: context.updatedAt,
 			},
-			'UPDATE_EVENT'
+			`UPDATE_EVENT COMMAND from user ${context.senderId}`
 		);
 		// await createEventCommand(context);
 	}
@@ -103,15 +107,16 @@ vk.hear(
 				createdAt: context.createdAt,
 				updatedAt: context.updatedAt,
 			},
-			'START Command Initialized'
+			`START COMMAND from user ${context.senderId}`
 		);
+		throw new Error();
 		await context.send(mainMenuMessage, {
 			keyboard: mainMenuKeyboard,
 		});
 	}
 );
 vk.hearOnFallback(async (context) => {
-	logger.info(
+	logger.warn(
 		{
 			eventType: context.eventType,
 			event: context.eventText,
@@ -124,11 +129,22 @@ vk.hearOnFallback(async (context) => {
 			createdAt: context.createdAt,
 			updatedAt: context.updatedAt,
 		},
-		'ON_FALLBACK event'
+		`ON_FALLBACK from user ${context.senderId}`
 	);
 	await context.send(onFallbackMessage, {
 		keyboard: mainMenuKeyboard,
 	});
 });
 
-vk.updates.startPolling().then(() => console.log('Bot started!'));
+vk.updates.startPolling().then(() => logger.info('Bot started!'));
+
+process.on('uncaughtException', async (error) => {
+	logger.fatal(error);
+	await vk.updates.stop();
+	process.exit(1);
+});
+process.on('unhandledRejection', async (error) => {
+	logger.fatal(error);
+	await vk.updates.stop();
+	process.exit(1);
+});

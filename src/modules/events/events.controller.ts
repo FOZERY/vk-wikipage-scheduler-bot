@@ -7,9 +7,9 @@ import {
 	FindCollisionsByDateTimePlaceDTO,
 	GetEventsByDateRangeDTO,
 	UpdateEventDTO,
-} from './dto/event.dto.js';
+} from './event.dto.js';
 import { EventEntity } from './event.entity.js';
-import { EventsRepository } from './repo/events.repository.js';
+import { EventsRepository } from './events.repository.js';
 
 export class EventsController {
 	constructor(
