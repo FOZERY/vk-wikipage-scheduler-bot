@@ -27,5 +27,5 @@ export const mainMenuKeyboard = Keyboard.builder()
 	.row()
 	.urlButton({
 		label: 'Перейти к расписанию',
-		url: 'https://www.google.com/',
+		url: process.env.PAGE_URL!,
 	});
