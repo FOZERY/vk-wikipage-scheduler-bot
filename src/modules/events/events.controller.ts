@@ -31,10 +31,44 @@ export class EventsController {
 	}
 
 	public async deleteEventById(id: number) {
-		const result = await this.eventsRepository.delete(id);
+		try {
+			await this.db.transaction(async (tx) => {
+				const result = await this.eventsRepository.delete(id, tx);
 
-		if (result.isErr()) {
-			return err(result.error);
+				if (result.isErr()) {
+					throw result.error;
+				}
+
+				const startOfMonthRange = dayjs().tz().startOf('M');
+				const endOfMonthRange = startOfMonthRange
+					.add(1, 'month')
+					.add(14, 'day');
+				const getEventsByDateRangeResult =
+					await this.eventsRepository.getEventsByDateRange(
+						{
+							startDate: startOfMonthRange.format('YYYY-MM-DD'),
+							endDate: endOfMonthRange.format('YYYY-MM-DD'),
+						},
+						tx
+					);
+
+				if (getEventsByDateRangeResult.isErr()) {
+					throw getEventsByDateRangeResult.error;
+				}
+
+				const eventsForRender = getEventsByDateRangeResult.value;
+				const renderResult = await this.scheduleRenderer.renderSchedule(
+					eventsForRender
+				);
+
+				if (renderResult.isErr()) {
+					throw renderResult.error;
+				}
+
+				return;
+			});
+		} catch (error) {
+			return err(error);
 		}
 
 		return ok(undefined);
@@ -165,10 +199,14 @@ export class EventsController {
 						.add(1, 'month')
 						.add(14, 'day');
 					const getEventsByDateRangeResult =
-						await this.eventsRepository.getEventsByDateRange({
-							startDate: startOfMonthRange.format('YYYY-MM-DD'),
-							endDate: endOfMonthRange.format('YYYY-MM-DD'),
-						});
+						await this.eventsRepository.getEventsByDateRange(
+							{
+								startDate:
+									startOfMonthRange.format('YYYY-MM-DD'),
+								endDate: endOfMonthRange.format('YYYY-MM-DD'),
+							},
+							tx
+						);
 
 					if (getEventsByDateRangeResult.isErr()) {
 						throw getEventsByDateRangeResult.error;
@@ -257,21 +295,22 @@ export class EventsController {
 						.add(1, 'month')
 						.add(14, 'day');
 					const getEventsByDateRangeResult =
-						await this.eventsRepository.getEventsByDateRange({
-							startDate: startOfMonthRange.format('YYYY-MM-DD'),
-							endDate: endOfMonthRange.format('YYYY-MM-DD'),
-						});
+						await this.eventsRepository.getEventsByDateRange(
+							{
+								startDate:
+									startOfMonthRange.format('YYYY-MM-DD'),
+								endDate: endOfMonthRange.format('YYYY-MM-DD'),
+							},
+							tx
+						);
 
 					if (getEventsByDateRangeResult.isErr()) {
 						throw getEventsByDateRangeResult.error;
 					}
 
-					const eventsForRender = getEventsByDateRangeResult.value;
-					const renderResult =
-						await this.scheduleRenderer.renderSchedule(
-							eventsForRender
-						);
-
+					const renderResult = await this.renderSchedule(
+						getEventsByDateRangeResult.value
+					);
 					if (renderResult.isErr()) {
 						throw renderResult.error;
 					}
@@ -285,5 +324,17 @@ export class EventsController {
 		} catch (error) {
 			return err(error);
 		}
+	}
+
+	private async renderSchedule(
+		events: EventEntity[]
+	): Promise<Result<void, unknown>> {
+		const renderResult = await this.scheduleRenderer.renderSchedule(events);
+
+		if (renderResult.isErr()) {
+			return err(renderResult.error);
+		}
+
+		return ok(undefined);
 	}
 }

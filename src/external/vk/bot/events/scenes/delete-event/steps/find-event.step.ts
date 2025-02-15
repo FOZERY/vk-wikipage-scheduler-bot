@@ -1,6 +1,6 @@
 import { MessageContext } from 'vk-io';
+import { leaveKeyabord } from '../../../../shared/keyboards/leave.keyboard.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { leaveKeyabord } from '../../../keyboards/leave.keyboard.js';
 import { selectEventKeyboard } from '../../../keyboards/selectEvent.keyboard.js';
 import {
 	DeleteEventSceneDependencies,

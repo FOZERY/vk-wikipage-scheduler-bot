@@ -1,6 +1,16 @@
 import dayjs from 'dayjs';
 import { Keyboard } from 'vk-io';
 
+export enum SetDateKeyboardCommand {
+	SetDate = 'setDate',
+	Leave = 'leave',
+}
+
+export type SetDateKeyboardPayload = {
+	date: string;
+	command: string;
+};
+
 export const setDateKeyboard = (() => {
 	const keyboard = Keyboard.builder();
 
@@ -11,6 +21,7 @@ export const setDateKeyboard = (() => {
 				label: now.format('DD.MM.YY'),
 				color: Keyboard.POSITIVE_COLOR,
 				payload: {
+					command: SetDateKeyboardCommand.SetDate,
 					date: now.format('YYYY-MM-DD'),
 				},
 			});
@@ -22,7 +33,7 @@ export const setDateKeyboard = (() => {
 		label: `Отмена`,
 		color: Keyboard.NEGATIVE_COLOR,
 		payload: {
-			command: `leave`,
+			command: SetDateKeyboardCommand.Leave,
 		},
 	});
 

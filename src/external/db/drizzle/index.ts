@@ -5,7 +5,7 @@ import postgres from 'postgres';
 import * as schema from './schema.js';
 
 const client = postgres(process.env.DATABASE_URL!, { prepare: false });
-export const db = drizzle({ client, schema });
+export const db = drizzle({ client });
 export type DrizzleDBType = typeof db;
 export type DrizzleTransctionType = PgTransaction<
 	PostgresJsQueryResultHKT,

@@ -1,7 +1,10 @@
 import { MessageContext } from 'vk-io';
+import { leaveKeyabord } from '../../../../shared/keyboards/leave.keyboard.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { leaveKeyabord } from '../../../keyboards/leave.keyboard.js';
-import { selectEventKeyboard } from '../../../keyboards/selectEvent.keyboard.js';
+import {
+	selectEventKeyboard,
+	SelectEventKeyboardPayload,
+} from '../../../keyboards/selectEvent.keyboard.js';
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
@@ -30,7 +33,9 @@ export const findEventStep: SceneStepWithDependencies<
 				return await context.scene.leave();
 			}
 			default: {
-				context.scene.state.event = context.messagePayload.event;
+				const { event } =
+					context.messagePayload as SelectEventKeyboardPayload;
+				context.scene.state.event = event;
 			}
 		}
 	} else {

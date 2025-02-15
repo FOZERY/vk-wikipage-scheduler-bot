@@ -1,7 +1,14 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { Keyboard } from 'vk-io';
 
-type TimePayload = {
+export enum SetTimeKeyboardPayloadCommand {
+	SetTime = 'setTime',
+	Leave = 'leave',
+	Previous = 'previous',
+}
+
+export type SetTimeKeyboardPayload = {
+	command: SetTimeKeyboardPayloadCommand;
 	startTime: string | null;
 	endTime: string | null;
 };
@@ -17,9 +24,10 @@ const createTimeButtons = (startHour: number, endHour: number) => {
 			Keyboard.textButton({
 				label: timeStringLabel,
 				payload: {
+					command: SetTimeKeyboardPayloadCommand.SetTime,
 					startTime: timeStringPayload,
 					endTime: null,
-				} as TimePayload,
+				} as SetTimeKeyboardPayload,
 			})
 		);
 	}
@@ -35,16 +43,20 @@ export const setTimeKeyboard = Keyboard.keyboard([
 	Keyboard.textButton({
 		label: 'Без времени',
 		color: Keyboard.PRIMARY_COLOR,
-		payload: { startTime: null, endTime: null } as TimePayload,
+		payload: {
+			startTime: null,
+			endTime: null,
+			command: SetTimeKeyboardPayloadCommand.SetTime,
+		} as SetTimeKeyboardPayload,
 	}),
 	Keyboard.textButton({
 		label: 'Назад',
 		color: Keyboard.NEGATIVE_COLOR,
-		payload: { command: 'previous' },
+		payload: { command: SetTimeKeyboardPayloadCommand.Previous },
 	}),
 	Keyboard.textButton({
 		label: 'Отмена',
 		color: Keyboard.NEGATIVE_COLOR,
-		payload: { command: 'leave' },
+		payload: { command: SetTimeKeyboardPayloadCommand.Leave },
 	}),
 ]);

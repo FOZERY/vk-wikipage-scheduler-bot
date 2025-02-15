@@ -11,7 +11,8 @@
     "preserveConstEnums": true,                       
     "noEmitOnError": true,                            
     "allowSyntheticDefaultImports": true,             
-    "esModuleInterop": true,            
+    "esModuleInterop": true,         
+    "noFallthroughCasesInSwitch": true,   
     "forceConsistentCasingInFileNames": true,            
     "strict": true,                                      
     "skipLibCheck": true                                 

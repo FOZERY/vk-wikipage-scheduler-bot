@@ -45,46 +45,18 @@ export const confirmStep: SceneStepWithDependencies<
 			case 'previous': {
 				return await context.scene.step.previous();
 			}
-			default: {
-				const result =
-					await context.dependencies.eventsController.deleteEventById(
-						context.scene.state.event.id!
-					);
-				if (result.isErr()) {
-					console.log(result.error);
-					return await context.send('Ошибка сервера.');
-				}
-
-				const startDate = dayjs().startOf('month');
-				const eventsForRender =
-					await context.dependencies.eventsController.getEventsByDateRange(
-						{
-							startDate: startDate.format('YYYY-MM-DD'),
-							endDate: startDate
-								.add(1, 'month')
-								.add(14, 'day')
-								.format('YYYY-MM-DD'),
-						}
-					);
-
-				if (eventsForRender.isErr()) {
-					console.error(eventsForRender.error);
-					return await context.send('Ошибка сервиса.');
-				}
-
-				const res =
-					await context.dependencies.scheduleRenderer.renderSchedule(
-						eventsForRender.value
-					);
-
-				if (res.isErr()) {
-					console.error(res.error);
-					return await context.send('Ошибка сервиса.');
-				}
-
-				return await context.send('Событие успешно удалено.');
-			}
 		}
 	}
+
+	const result = await context.dependencies.eventsController.deleteEventById(
+		context.scene.state.event.id!
+	);
+
+	if (result.isErr()) {
+		console.log(result.error);
+		return await context.send('Ошибка сервера.');
+	}
+
+	await context.send('Событие успешно удалено.');
 	return await context.scene.leave();
 };
