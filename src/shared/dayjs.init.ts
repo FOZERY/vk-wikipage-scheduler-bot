@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import 'dayjs/locale/ru';
+import 'dayjs/locale/ru.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import utc from 'dayjs/plugin/utc.js';
