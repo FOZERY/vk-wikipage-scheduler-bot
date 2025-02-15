@@ -6,6 +6,11 @@ import {
 import { EventEntity } from './event.entity.js';
 
 export interface EventsRepository {
+	getById(
+		id: number,
+		tx?: unknown
+	): Promise<Result<EventEntity | null, unknown>>;
+
 	findEventsByTitleOrDate(
 		searchString: string,
 		tx?: unknown

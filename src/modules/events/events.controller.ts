@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { err, ok } from 'neverthrow';
+import { err, ok, Result } from 'neverthrow';
 import { ScheduleRenderer } from '../../external/vk/api/wiki/schedule/schedule-renderer.js';
 import {
 	CreateEventDTO,
@@ -195,5 +195,95 @@ export class EventsController {
 		}
 	}
 
-	public async update(event: UpdateEventDTO) {}
+	public async update(eventDTO: UpdateEventDTO) {
+		const entityResult = await this.eventsRepository.getById(eventDTO.id);
+		if (entityResult.isErr()) {
+			return err(entityResult.error);
+		}
+
+		const event = entityResult.value;
+
+		if (!event) {
+			return err('Event not found');
+		}
+
+		try {
+			await this.db.transaction(
+				async (tx) => {
+					const checkCollisionResult =
+						await this.eventsRepository.findCollisionsByDateTimePlace(
+							{
+								date: eventDTO.date,
+								place: eventDTO.place,
+								endTime: eventDTO.endTime,
+								startTime: eventDTO.startTime,
+								excludeId: event.id,
+							},
+							tx
+						);
+
+					if (checkCollisionResult.isErr()) {
+						throw checkCollisionResult.error;
+					}
+
+					if (checkCollisionResult.value.length > 0) {
+						throw new Error('Event collision detected');
+					}
+
+					const updatePropsResult = Result.combine([
+						event.setOrganizer(eventDTO.organizer),
+						event.setPlace(eventDTO.place),
+						event.setTitle(eventDTO.title),
+						event.setDate(eventDTO.date),
+						event.setStartTime(eventDTO.startTime),
+						event.setEndTime(eventDTO.endTime),
+					]);
+
+					if (updatePropsResult.isErr()) {
+						throw updatePropsResult.error;
+					}
+
+					const updateResult = await this.eventsRepository.update(
+						event,
+						tx
+					);
+
+					if (updateResult.isErr()) {
+						throw updateResult.error;
+					}
+
+					const startOfMonthRange = dayjs().tz().startOf('M');
+					const endOfMonthRange = startOfMonthRange
+						.add(1, 'month')
+						.add(14, 'day');
+					const getEventsByDateRangeResult =
+						await this.eventsRepository.getEventsByDateRange({
+							startDate: startOfMonthRange.format('YYYY-MM-DD'),
+							endDate: endOfMonthRange.format('YYYY-MM-DD'),
+						});
+
+					if (getEventsByDateRangeResult.isErr()) {
+						throw getEventsByDateRangeResult.error;
+					}
+
+					const eventsForRender = getEventsByDateRangeResult.value;
+					const renderResult =
+						await this.scheduleRenderer.renderSchedule(
+							eventsForRender
+						);
+
+					if (renderResult.isErr()) {
+						throw renderResult.error;
+					}
+
+					return;
+				},
+				{ isolationLevel: 'serializable' }
+			);
+
+			return ok(undefined);
+		} catch (error) {
+			return err(error);
+		}
+	}
 }

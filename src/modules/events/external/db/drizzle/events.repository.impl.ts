@@ -11,6 +11,7 @@ import {
 	isNull,
 	lt,
 	lte,
+	ne,
 	or,
 	sql,
 } from 'drizzle-orm';
@@ -28,6 +29,49 @@ import { EventsRepository } from '../../../events.repository.js';
 
 export class EventsRepositoryImpl implements EventsRepository {
 	constructor(private readonly db: PostgresJsDatabase) {}
+
+	public async getById(
+		id: number,
+		tx?: unknown
+	): Promise<Result<EventEntity | null, unknown>> {
+		if (tx && !(tx instanceof PgTransaction)) {
+			return err('tx is not instanceof PgTransaction');
+		}
+
+		const connection = (tx as DrizzleTransctionType) ?? this.db;
+
+		try {
+			const event = await connection
+				.select()
+				.from(eventsTable)
+				.where(eq(eventsTable.id, id))
+				.limit(1);
+
+			if (event.length === 0) {
+				return ok(null);
+			}
+
+			const eventResult = EventEntity.create({
+				id: event[0].id,
+				date: event[0].date,
+				startTime: event[0].start_time,
+				endTime: event[0].end_time,
+				organizer: event[0].organizer,
+				place: event[0].place,
+				title: event[0].title,
+				createdAt: event[0].created_at || undefined,
+				updatedAt: event[0].updated_at || undefined,
+			});
+
+			if (eventResult.isErr()) {
+				return err(eventResult.error);
+			}
+
+			return ok(eventResult.value);
+		} catch (error) {
+			return err(error);
+		}
+	}
 
 	public async delete(
 		id: number,
@@ -170,6 +214,13 @@ export class EventsRepositoryImpl implements EventsRepository {
 			ilike(eventsTable.place, `%${dto.place}%`),
 			isNotNull(eventsTable.start_time)
 		);
+
+		if (dto.excludeId) {
+			whereConditions = and(
+				whereConditions,
+				ne(eventsTable.id, dto.excludeId)
+			);
+		}
 
 		/*
 		 * Вообще здесь можно сделать и через time range postgres type, но как будто бы слишком накладно??

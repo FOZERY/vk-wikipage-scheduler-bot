@@ -1,20 +1,20 @@
 import { MessageContext } from 'vk-io';
-import { SceneStepWithDependencies } from '../../../shared/utils/scene-utils.js';
-import { leaveKeyabord } from '../../keyboards/leave.keyboard.js';
-import { selectEventKeyboard } from '../../keyboards/selectEvent.keyboard.js';
+import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
+import { leaveKeyabord } from '../../../keyboards/leave.keyboard.js';
+import { selectEventKeyboard } from '../../../keyboards/selectEvent.keyboard.js';
 import {
-	DeleteEventSceneDependencies,
-	DeleteEventSceneState,
-} from './types.js';
+	UpdateEventSceneDependencies,
+	UpdateEventSceneState,
+} from '../types.js';
 
 export const findEventStep: SceneStepWithDependencies<
 	MessageContext,
-	DeleteEventSceneState,
-	DeleteEventSceneDependencies
+	UpdateEventSceneState,
+	UpdateEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
 		return await context.send(
-			`Используй сообщение для поиска события, которое хочешь удалить (искать можно по дате, названию, организатору).`,
+			`Используй сообщение для поиска события, которое хочешь изменить (искать можно по дате, названию, организатору).`,
 			{ keyboard: leaveKeyabord }
 		);
 	}

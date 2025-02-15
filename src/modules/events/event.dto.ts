@@ -3,6 +3,7 @@ export interface FindCollisionsByDateTimePlaceDTO {
 	startTime: string | null;
 	endTime: string | null;
 	place: string;
+	excludeId?: number;
 }
 
 export interface CreateEventDTO {
@@ -20,7 +21,7 @@ export interface GetEventsByDateRangeDTO {
 }
 
 export interface UpdateEventDTO {
-	id: string;
+	id: number;
 	date: string;
 	place: string;
 	title: string;

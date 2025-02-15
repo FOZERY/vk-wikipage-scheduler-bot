@@ -4,8 +4,10 @@ import { logger } from './external/logger/pino.js';
 import { VKExtend } from './external/vk/bot/bot.js';
 import { addEventCommand } from './external/vk/bot/events/commands/addEvent.command.js';
 import { deleteEventCommand } from './external/vk/bot/events/commands/deleteEvent.command.js';
+import { updateEventCommand } from './external/vk/bot/events/commands/updateEvent.command.js';
 import { addEventScene } from './external/vk/bot/events/scenes/add-event/add-event.scene.js';
-import { deleteEventScene } from './external/vk/bot/events/scenes/delete-event/deleteEvent.scene.js';
+import { deleteEventScene } from './external/vk/bot/events/scenes/delete-event/delete-event.scene.js';
+import { updateEventScene } from './external/vk/bot/events/scenes/update-event/update-event.scene.js';
 import { mainMenuKeyboard } from './external/vk/bot/shared/keyboards/mainMenu.keyboard.js';
 import { mainMenuMessage } from './external/vk/bot/shared/messages/mainMenu.message.js';
 import { onFallbackMessage } from './external/vk/bot/shared/messages/onFallback.message..js';
@@ -17,7 +19,7 @@ const vk = new VKExtend({
 	hearEvents: ['message_new'],
 });
 
-vk.addScenes([addEventScene, deleteEventScene]);
+vk.addScenes([addEventScene, deleteEventScene, updateEventScene]);
 
 vk.hear(
 	[{ 'messagePayload.command': 'createEvent' }, { text: '/add' }],
@@ -41,7 +43,7 @@ vk.hear(
 			},
 			`ADD_EVENT COMMAND from user ${context.senderId}`
 		);
-		throw new Error();
+
 		await addEventCommand(context);
 	}
 );
@@ -64,7 +66,7 @@ vk.hear(
 			},
 			`UPDATE_EVENT COMMAND from user ${context.senderId}`
 		);
-		// await createEventCommand(context);
+		await updateEventCommand(context);
 	}
 );
 vk.hear(

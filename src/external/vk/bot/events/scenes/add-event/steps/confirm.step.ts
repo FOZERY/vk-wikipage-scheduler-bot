@@ -78,30 +78,6 @@ export const confirmStep: SceneStepWithDependencies<
 		await context.send('Ошибка сервиса.');
 	}
 
-	const startDate = dayjs().startOf('month');
-	const eventsForRender =
-		await context.dependencies.eventsController.getEventsByDateRange({
-			startDate: startDate.format('YYYY-MM-DD'),
-			endDate: startDate
-				.add(1, 'month')
-				.add(14, 'day')
-				.format('YYYY-MM-DD'),
-		});
-
-	if (eventsForRender.isErr()) {
-		console.error(eventsForRender.error);
-		return await context.send('Ошибка сервиса.');
-	}
-
-	const res = await context.dependencies.scheduleRenderer.renderSchedule(
-		eventsForRender.value
-	);
-
-	if (res.isErr()) {
-		console.error(res.error);
-		return await context.send('Ошибка сервиса.');
-	}
-
 	await context.send('Событие успешно создано');
 
 	return await context.scene.leave();
