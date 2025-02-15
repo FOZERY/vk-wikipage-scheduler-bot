@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf dist",
-    "initdb:dev": "NODE_ENV=development node --experimental-sqlite ./database/migrations/initDB.js",
-    "initdb:prod": "NODE_ENV=production node --experimental-sqlite ./database/migrations/initDB.js",
-    "prebuild": "npm run clean",
+    "prebuild": "pnpm clean",
     "build": "tsc --project ./tsconfig.build.json",
     "start:dev": "node --env-file=./env/.development.env ./dist/index.js", 
+    "start:prod": "node --env-file=./env/.production.env ./dist/index.js",
     "watch:dev": "tsx --env-file=./env/.development.env --watch ./src/index.ts",
     "pretest": "tsc --noEmit",
     "type-check": "tsc --noEmit",
