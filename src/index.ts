@@ -1,8 +1,6 @@
 import './shared/dayjs.init.js';
 
-import { CronJob } from 'cron';
 import { logger } from './external/logger/pino.js';
-import { ScheduleRenderer } from './external/vk/api/wiki/schedule/schedule-renderer.js';
 import { VKExtend } from './external/vk/bot/bot.js';
 import { addEventCommand } from './external/vk/bot/events/commands/addEvent.command.js';
 import { deleteEventCommand } from './external/vk/bot/events/commands/deleteEvent.command.js';
@@ -14,7 +12,6 @@ import { mainMenuKeyboard } from './external/vk/bot/shared/keyboards/main-menu.k
 import { mainMenuMessage } from './external/vk/bot/shared/messages/mainMenu.message.js';
 import { onFallbackMessage } from './external/vk/bot/shared/messages/onFallback.message..js';
 import { getContextPartForLogging } from './external/vk/bot/shared/utils/logger-messages.js';
-import { eventsController } from './modules/events/index.js';
 
 const vk = new VKExtend({
 	token: process.env.LONGPOLL_TOKEN!,
