@@ -3,7 +3,6 @@ import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/only
 import {
 	attachTextButtonToKeyboard,
 	previousButtonOptions,
-	previousButtonOptions,
 } from '../../../../shared/utils/keyboard-utils.js';
 import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
