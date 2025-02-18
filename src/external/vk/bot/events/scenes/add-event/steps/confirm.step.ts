@@ -9,11 +9,12 @@ import {
 import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
+import { getConfirmKeyboard } from '../../../keyboards/confirm.keyboard.js';
+import { EventSceneEnum } from '../../../types/events.types.js';
 import {
-	confirmKeyboard,
-	getConfirmKeyboard,
-} from '../../../keyboards/confirm.keyboard.js';
-import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
+	AddEventSceneDependencies,
+	AddEventSceneState,
+} from '../add-event.scene.js';
 
 export const confirmStep: SceneStepWithDependencies<
 	MessageContext,
@@ -42,18 +43,9 @@ export const confirmStep: SceneStepWithDependencies<
 Место: ${context.scene.state.place}	
 Название: ${context.scene.state.title}
 Организатор: ${context.scene.state.organizer || 'Не указан'}
-
-Подтвердить создание события?
-
-/confirm - подтвердить
-/restartScene - начать заново
-/previous - назад
-/leave - отмена
-			`,
+`,
 			{
 				keyboard: attachTextButtonToKeyboard(getConfirmKeyboard(), [
-					previousButtonOptions,
-					leaveButtonOptions,
 					{
 						label: 'Начать заново',
 						payload: {
@@ -61,6 +53,8 @@ export const confirmStep: SceneStepWithDependencies<
 						},
 						color: Keyboard.SECONDARY_COLOR,
 					},
+					previousButtonOptions,
+					leaveButtonOptions,
 				]),
 			}
 		);
@@ -81,36 +75,24 @@ export const confirmStep: SceneStepWithDependencies<
 			}
 			case 'restartScene': {
 				context.scene.reset();
-				return await context.scene.enter('dateStep');
+				return await context.scene.enter(EventSceneEnum.addEvent);
 			}
 			case 'confirm': {
 				break;
 			}
 			default: {
-				logStep(context, 'Unknown command', 'error');
-				throw new Error('Unknown command');
+				logStep(
+					context,
+					`Unknown command: ${context.messagePayload.command}`,
+					'error'
+				);
+				throw new Error(
+					`Unknown command: ${context.messagePayload.command}`
+				);
 			}
 		}
 	} else {
-		const trimmedText = context.text.trim();
-		switch (trimmedText.toLowerCase()) {
-			case '/previous': {
-				return await context.scene.step.previous();
-			}
-			case '/leave': {
-				return await context.scene.leave();
-			}
-			case '/restartscene': {
-				context.scene.reset();
-				return await context.scene.enter('dateStep');
-			}
-			case '/confirm': {
-				break;
-			}
-			default: {
-				return await context.reply('Неизвестная команда');
-			}
-		}
+		return await context.reply('Воспользуйся клавиатурой');
 	}
 
 	const result = await context.dependencies.eventsController.create({

@@ -1,4 +1,3 @@
-import { log } from 'console';
 import { MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
 import {
@@ -10,7 +9,10 @@ import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { parseTimeString } from '../../../../shared/utils/time-utils.js';
 import { getTimeKeyboard } from '../../../keyboards/time.keyboard.js';
-import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
+import {
+	AddEventSceneDependencies,
+	AddEventSceneState,
+} from '../add-event.scene.js';
 
 export const timeStep: SceneStepWithDependencies<
 	MessageContext,
@@ -32,9 +34,7 @@ export const timeStep: SceneStepWithDependencies<
 3. - (если времени нет) 
 			
 Либо выбери один из вариантов на клавиатуре.
-
-/previous - назад
-/leave - отмена`,
+`,
 			{
 				keyboard: attachTextButtonToKeyboard(getTimeKeyboard(), [
 					previousButtonOptions,
@@ -63,20 +63,18 @@ export const timeStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(context, 'unknown command in time step', 'error');
-				throw new Error('unknown command');
+				logStep(
+					context,
+					`Unknown command: ${context.messagePayload.command}`,
+					'error'
+				);
+				throw new Error(
+					`Unknown command: ${context.messagePayload.command}`
+				);
 			}
 		}
 	} else {
 		const trimmedText = context.text.trim();
-
-		if (trimmedText.toLocaleLowerCase() === '/leave') {
-			return await context.scene.leave();
-		}
-
-		if (trimmedText.toLocaleLowerCase() === '/previous') {
-			return await context.scene.step.previous();
-		}
 
 		if (trimmedText === '-') {
 			context.scene.state.startTime = null;

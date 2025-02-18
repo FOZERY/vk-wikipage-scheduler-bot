@@ -35,35 +35,3 @@ export function attachTextButtonToKeyboard(
 
 	return keyboard;
 }
-
-export function attachNavigationButtonsToKeyboard(
-	keyboard: KeyboardBuilder,
-	buttons: {
-		previousButton: boolean;
-		leaveButton: boolean;
-	}
-) {
-	if (buttons.previousButton) {
-		keyboard.row();
-		keyboard.textButton({
-			label: `Назад`,
-			color: Keyboard.NEGATIVE_COLOR,
-			payload: {
-				command: NavigationButtonsCommand.Previous,
-			},
-		});
-	}
-
-	if (buttons.leaveButton) {
-		keyboard.row();
-		keyboard.textButton({
-			label: `Отмена`,
-			color: Keyboard.NEGATIVE_COLOR,
-			payload: {
-				command: NavigationButtonsCommand.Leave,
-			},
-		});
-	}
-
-	return keyboard;
-}

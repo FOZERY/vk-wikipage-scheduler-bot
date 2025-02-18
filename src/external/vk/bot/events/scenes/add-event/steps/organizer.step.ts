@@ -9,7 +9,10 @@ import {
 import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { getOrganizerKeyboard } from '../../../keyboards/organizer.keyboard.js';
-import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
+import {
+	AddEventSceneDependencies,
+	AddEventSceneState,
+} from '../add-event.scene.js';
 
 export const placeStep: SceneStepWithDependencies<
 	MessageContext,
@@ -25,9 +28,6 @@ export const placeStep: SceneStepWithDependencies<
 		return await context.send(
 			`
 Введи имя организатора.
-			
-/previous - назад
-/leave - отмена
 `,
 			{
 				keyboard: attachTextButtonToKeyboard(getOrganizerKeyboard(), [
@@ -56,21 +56,19 @@ export const placeStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(context, 'unknown command', 'error');
-				throw new Error('unknown command');
+				logStep(
+					context,
+					`Unknown command: ${context.messagePayload.command}`,
+					'error'
+				);
+				throw new Error(
+					`Unknown command: ${context.messagePayload.command}`
+				);
 			}
 		}
 	} else {
 		// если ввели текст
 		const parsedOrganizer = context.text.trim();
-
-		if (parsedOrganizer.toLowerCase() === '/previous') {
-			return await context.scene.step.previous();
-		}
-
-		if (parsedOrganizer.toLowerCase() === '/leave') {
-			return await context.scene.leave();
-		}
 
 		if (parsedOrganizer.length > 255) {
 			logStep(

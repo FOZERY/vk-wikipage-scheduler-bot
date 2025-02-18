@@ -1,6 +1,7 @@
+import { Logger } from 'pino';
 import { MessageContext } from 'vk-io';
+import { EventsController } from '../../../../../../modules/events/events.controller.js';
 import { eventsController } from '../../../../../../modules/events/index.js';
-import { db } from '../../../../../db/drizzle/index.js';
 import { logger } from '../../../../../logger/pino.js';
 import { mainMenuKeyboard } from '../../../shared/keyboards/main-menu.keyboard.js';
 import { mainMenuMessage } from '../../../shared/messages/mainMenu.message.js';
@@ -15,7 +16,20 @@ import {
 	timeStep,
 	titleStep,
 } from './steps/index.js';
-import { AddEventSceneDependencies, AddEventSceneState } from './types.js';
+
+export type AddEventSceneState = {
+	date: string; // YYYY-MM-DD in local
+	startTime: string | null; // HH:mm:ss
+	endTime: string | null; // HH:mm:ss
+	place: string;
+	organizer: string | null;
+	title: string;
+};
+
+export type AddEventSceneDependencies = {
+	eventsController: EventsController;
+	logger: Logger;
+};
 
 export const addEventScene = createScene<
 	MessageContext,
@@ -27,7 +41,6 @@ export const addEventScene = createScene<
 	{
 		dependencies: {
 			eventsController: eventsController,
-			db: db,
 			logger: logger.child({
 				scene: 'add-event',
 			}),
@@ -37,7 +50,7 @@ export const addEventScene = createScene<
 				{
 					context: getContextPartForLogging(context),
 				},
-				'LEAVE ADD_EVENT SCENE'
+				`User ${context.senderId} -> left add-event scene`
 			);
 			return await context.send(mainMenuMessage, {
 				keyboard: mainMenuKeyboard,

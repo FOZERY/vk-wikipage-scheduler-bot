@@ -1,19 +1,24 @@
 import dayjs from 'dayjs';
 import { MessageContext } from 'vk-io';
-import { logger } from '../../../../../../logger/pino.js';
+import {
+	attachTextButtonToKeyboard,
+	leaveButtonOptions,
+	previousButtonOptions,
+} from '../../../../shared/utils/keyboard-utils.js';
+import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
 import {
+	getSelectFieldOrConfirmKeyboard,
 	SelectField,
 	SelectFieldKeyboardCommand,
 	SelectFieldKeyboardPayload,
-	selectFieldOrConfirmKeyboard,
 } from '../../../keyboards/select-field.keyboard.js';
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
-} from '../types.js';
-import { UpdateEventSceneStepNumber } from '../update-event.scene.js';
+	UpdateEventSceneStepNumber,
+} from '../update-event.scene.js';
 
 export const selectFieldStep: SceneStepWithDependencies<
 	MessageContext,
@@ -21,6 +26,12 @@ export const selectFieldStep: SceneStepWithDependencies<
 	UpdateEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
+		logStep(
+			context,
+			`User ${context.senderId} -> entered select-field step`,
+			'info'
+		);
+
 		return await context.send(
 			`
 Вы выбрали следующее событие:
@@ -35,16 +46,23 @@ export const selectFieldStep: SceneStepWithDependencies<
 Название: ${context.scene.state.event.title}
 Организатор: ${context.scene.state.event.organizer || 'не указан'}
 
-Выберите, что хотите изменить.	
+Выберите, что хочешь изменить.	
 `,
-			{ keyboard: selectFieldOrConfirmKeyboard }
+			{
+				keyboard: attachTextButtonToKeyboard(
+					getSelectFieldOrConfirmKeyboard(),
+					[previousButtonOptions, leaveButtonOptions]
+				),
+			}
 		);
 	}
+
 	if (!context.text) {
 		return await context.reply(
 			`Разрешено вводить только текст, либо пользоваться клавиатурой.`
 		);
 	}
+
 	if (context.hasMessagePayload) {
 		const payload = context.messagePayload as SelectFieldKeyboardPayload;
 		// если ввели с клавиатуры
@@ -88,7 +106,6 @@ export const selectFieldStep: SceneStepWithDependencies<
 						throw new Error(`Unexpected field: ${payload.field}`);
 					}
 				}
-				break;
 			}
 			case SelectFieldKeyboardCommand.Confirm: {
 				const result =
@@ -97,16 +114,36 @@ export const selectFieldStep: SceneStepWithDependencies<
 					);
 
 				if (result.isErr()) {
-					logger.error(result.error);
+					logStep(
+						context,
+						`User ${context.senderId} -> controller update error`,
+						'error',
+						result.error
+					);
 					return await context.send('Ошибка сервера');
 				}
 
-				await context.send('Событие успешно удалено.');
+				await context.send('Событие успешно обновлено.');
+
+				logStep(
+					context,
+					`User ${context.senderId} -> passed select-field step`,
+					'info'
+				);
 				return await context.scene.leave();
+			}
+			default: {
+				logStep(
+					context,
+					`User ${context.senderId} -> unknown command - ${context.messagePayload.command}`,
+					'error'
+				);
+				throw new Error(
+					`Unknown command - ${context.messagePayload.command}`
+				);
 			}
 		}
 	} else {
-		throw new Error('not implemented');
+		return await context.reply(`Воспользуйся клавиатурой.`);
 	}
-	return await context.scene.step.next();
 };

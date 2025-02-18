@@ -1,11 +1,17 @@
 import dayjs from 'dayjs';
-import { Context } from 'vk-io';
+import { Context, Keyboard } from 'vk-io';
+import {
+	attachTextButtonToKeyboard,
+	leaveButtonOptions,
+	previousButtonOptions,
+} from '../../../../shared/utils/keyboard-utils.js';
+import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
 import {
 	DeleteEventSceneDependencies,
 	DeleteEventSceneState,
-} from '../types.js';
+} from '../delete-event.scene.js';
 
 export const confirmStep: SceneStepWithDependencies<
 	Context,
@@ -13,9 +19,15 @@ export const confirmStep: SceneStepWithDependencies<
 	DeleteEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
+		logStep(
+			context,
+			`User ${context.senderId} -> entered confirm step`,
+			'info'
+		);
+
 		return await context.send(
-			`	
-Вы действительно хотите удалить это событие?
+			`		
+Ты действительно хочешь удалить это событие?
 Дата: ${dayjs(context.scene.state.event.date, 'YYYY-MM-DD').format(
 				'DD.MM.YYYY'
 			)}	
@@ -27,7 +39,17 @@ export const confirmStep: SceneStepWithDependencies<
 Название: ${context.scene.state.event.title}
 Организатор: ${context.scene.state.event.organizer || 'не указан'}
 `,
-			{ keyboard: confirmDeleteKeyboard }
+			{
+				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [
+					{
+						label: 'Удалить',
+						color: Keyboard.POSITIVE_COLOR,
+						payload: { command: 'deleteEvent' },
+					},
+					previousButtonOptions,
+					leaveButtonOptions,
+				]),
+			}
 		);
 	}
 	if (!context.text) {
@@ -45,6 +67,9 @@ export const confirmStep: SceneStepWithDependencies<
 				return await context.scene.step.previous();
 			}
 		}
+	} else {
+		// если ввели текст
+		return await context.reply(`Воспользуйся клавиатурой.`);
 	}
 
 	const result = await context.dependencies.eventsController.deleteEventById(
@@ -52,10 +77,17 @@ export const confirmStep: SceneStepWithDependencies<
 	);
 
 	if (result.isErr()) {
-		console.log(result.error);
+		logStep(
+			context,
+			`User ${context.senderId} -> error while deleting event`,
+			'error',
+			result.error
+		);
 		return await context.send('Ошибка сервера.');
 	}
 
 	await context.send('Событие успешно удалено.');
+
+	logStep(context, `User ${context.senderId} -> passed confirm step`, 'info');
 	return await context.scene.leave();
 };

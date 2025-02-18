@@ -1,12 +1,16 @@
-import { MessageContext } from 'vk-io';
+import { Keyboard, MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import {
+	attachTextButtonToKeyboard,
+	previousButtonOptions,
+} from '../../../../shared/utils/keyboard-utils.js';
+import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
-} from '../types.js';
-import { UpdateEventSceneStepNumber } from '../update-event.scene.js';
+	UpdateEventSceneStepNumber,
+} from '../update-event.scene.js';
 
 export const updateTitleStep: SceneStepWithDependencies<
 	MessageContext,
@@ -14,8 +18,16 @@ export const updateTitleStep: SceneStepWithDependencies<
 	UpdateEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
+		logStep(
+			context,
+			`User ${context.senderId} -> entered update-title step`,
+			'info'
+		);
+
 		return await context.send(`Введи название события`, {
-			keyboard: setTitleKeyboard,
+			keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [
+				previousButtonOptions,
+			]),
 		});
 	}
 
@@ -25,25 +37,42 @@ export const updateTitleStep: SceneStepWithDependencies<
 
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
-		const payload = context.messagePayload as SetTitleKeyboardPayload;
+		const payload = context.messagePayload;
 		switch (payload.command) {
-			case SetTitleKeyboardPayloadCommand.Previous: {
-				return await context.scene.step.previous();
+			case 'previous': {
+				return await context.scene.step.go(
+					UpdateEventSceneStepNumber.SelectFieldOrConfirm
+				);
 			}
-			case SetTitleKeyboardPayloadCommand.Leave: {
-				return await context.scene.leave();
+			default: {
+				logStep(
+					context,
+					`Unknown command: ${payload.command}`,
+					'error'
+				);
+				throw new Error('Unknown command');
 			}
 		}
 	} else {
 		// если ввели текст
 		const parsedTitle = context.text.trim();
 		if (parsedTitle.length > 255) {
+			logStep(
+				context,
+				`User ${context.senderId} -> too long (>255) title`,
+				'info'
+			);
 			return await context.reply(`Слишком длинное название для события`);
 		}
 
 		context.scene.state.event.title = parsedTitle;
 	}
 
+	logStep(
+		context,
+		`User ${context.senderId} -> passed update-title step`,
+		'info'
+	);
 	return await context.scene.step.go(
 		UpdateEventSceneStepNumber.SelectFieldOrConfirm
 	);

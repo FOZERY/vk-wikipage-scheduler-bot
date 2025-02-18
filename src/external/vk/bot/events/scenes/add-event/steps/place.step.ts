@@ -8,7 +8,10 @@ import {
 import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { getPlaceKeyboard } from '../../../keyboards/place.keyboard.js';
-import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
+import {
+	AddEventSceneDependencies,
+	AddEventSceneState,
+} from '../add-event.scene.js';
 
 export const organizerStep: SceneStepWithDependencies<
 	MessageContext,
@@ -24,9 +27,6 @@ export const organizerStep: SceneStepWithDependencies<
 		return await context.send(
 			`
 Введи название места события или выбери с клавиатуры.
-
-/previous - назад
-/leave - отмена	
 `,
 			{
 				keyboard: attachTextButtonToKeyboard(getPlaceKeyboard(), [
@@ -55,21 +55,19 @@ export const organizerStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(context, 'Unknown command', 'error');
-				throw new Error('Unknown command');
+				logStep(
+					context,
+					`Unknown command: ${context.messagePayload.command}`,
+					'error'
+				);
+				throw new Error(
+					`Unknown command: ${context.messagePayload.command}`
+				);
 			}
 		}
 	} else {
 		// если ввели текст
 		const parsedText = context.text.trim();
-
-		if (parsedText.toLowerCase() === '/previous') {
-			return await context.scene.step.previous();
-		}
-
-		if (parsedText.toLowerCase() === '/leave') {
-			return await context.scene.leave();
-		}
 
 		if (parsedText.length > 255) {
 			logStep(

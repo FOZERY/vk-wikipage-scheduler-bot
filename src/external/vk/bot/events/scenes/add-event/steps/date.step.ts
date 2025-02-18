@@ -8,7 +8,10 @@ import {
 import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { getDateKeyboard } from '../../../keyboards/date.keyboard.js';
-import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
+import {
+	AddEventSceneDependencies,
+	AddEventSceneState,
+} from '../add-event.scene.js';
 
 export const dateStep: SceneStepWithDependencies<
 	MessageContext,
@@ -24,8 +27,6 @@ export const dateStep: SceneStepWithDependencies<
 		return await context.send(
 			`
 Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
-
-/leave - отмена
 			`,
 			{
 				keyboard: attachTextButtonToKeyboard(
@@ -51,17 +52,19 @@ export const dateStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(context, 'Unknown command in date step', 'error');
-				throw new Error('Unknown command');
+				logStep(
+					context,
+					`Unknown command: ${context.messagePayload.command}`,
+					'error'
+				);
+				throw new Error(
+					`Unknown command: ${context.messagePayload.command}`
+				);
 			}
 		}
 	} else {
 		// если ввели текст
 		const trimmedText = context.text.trim();
-
-		if (trimmedText.toLowerCase() === '/leave') {
-			return await context.scene.leave();
-		}
 
 		const result = convertRussianDateStringToDefaultFormat(trimmedText);
 		if (result.isErr()) {

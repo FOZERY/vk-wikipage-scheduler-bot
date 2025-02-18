@@ -7,7 +7,10 @@ import {
 } from '../../../../shared/utils/keyboard-utils.js';
 import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
+import {
+	AddEventSceneDependencies,
+	AddEventSceneState,
+} from '../add-event.scene.js';
 
 export const titleStep: SceneStepWithDependencies<
 	MessageContext,
@@ -23,9 +26,7 @@ export const titleStep: SceneStepWithDependencies<
 		return await context.send(
 			`
 Введи название события
-
-/previous - назад
-/leave - отмена`,
+`,
 			{
 				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [
 					previousButtonOptions,
@@ -49,21 +50,19 @@ export const titleStep: SceneStepWithDependencies<
 				return await context.scene.leave();
 			}
 			default: {
-				logStep(context, 'Unknown command', 'error');
-				throw new Error('Unknown command');
+				logStep(
+					context,
+					`Unknown command: ${context.messagePayload.command}`,
+					'error'
+				);
+				throw new Error(
+					`Unknown command: ${context.messagePayload.command}`
+				);
 			}
 		}
 	} else {
 		// если ввели текст
 		const parsedTitle = context.text.trim();
-
-		if (parsedTitle === '/previous') {
-			return await context.scene.step.previous();
-		}
-
-		if (parsedTitle === '/leave') {
-			return await context.scene.leave();
-		}
 
 		if (parsedTitle.length > 255) {
 			logStep(
