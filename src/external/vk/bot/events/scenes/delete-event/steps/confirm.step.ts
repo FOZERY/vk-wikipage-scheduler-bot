@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { Context } from 'vk-io';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
-import { confirmDeleteKeyboard } from '../../../keyboards/confirmDelete.keyboard.js';
 import {
 	DeleteEventSceneDependencies,
 	DeleteEventSceneState,

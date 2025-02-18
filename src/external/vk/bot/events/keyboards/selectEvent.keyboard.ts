@@ -39,16 +39,9 @@ export const selectEventKeyboard = (events: EventEntity[]) => {
 					endTime: event.endTime,
 					organizer: event.organizer,
 				},
-			} as SelectEventKeyboardPayload,
+			},
 		});
 		keyboard.row();
-	});
-	keyboard.row().textButton({
-		label: 'Отмена',
-		color: Keyboard.NEGATIVE_COLOR,
-		payload: {
-			command: 'leave',
-		},
 	});
 
 	return keyboard;

@@ -1,12 +1,7 @@
 import { AllowArray, HearConditions, HearManager } from '@vk-io/hear';
 import { IScene, Middleware, SceneManager } from '@vk-io/scenes';
 import { SessionManager } from '@vk-io/session';
-import {
-	VK as _VK,
-	MessageContextSubType,
-	MessageContextType,
-	VK,
-} from 'vk-io';
+import { VK as _VK, MessageContextSubType, MessageContextType } from 'vk-io';
 import { MessageContextWithScene } from './shared/types/context.type.js';
 
 type VKOptions = {

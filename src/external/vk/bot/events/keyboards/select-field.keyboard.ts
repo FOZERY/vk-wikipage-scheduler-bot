@@ -53,16 +53,4 @@ export const selectFieldOrConfirmKeyboard = Keyboard.builder()
 		label: 'Подтвердить',
 		color: Keyboard.POSITIVE_COLOR,
 		payload: { command: 'confirm' },
-	})
-	.row()
-	.textButton({
-		label: 'Назад',
-		color: Keyboard.NEGATIVE_COLOR,
-		payload: { command: 'previous' },
-	})
-	.row()
-	.textButton({
-		label: 'Отмена',
-		color: Keyboard.NEGATIVE_COLOR,
-		payload: { command: 'leave' },
 	});

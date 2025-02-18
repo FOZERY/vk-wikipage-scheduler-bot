@@ -2,11 +2,7 @@ import { MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
 import { convertRussianDateStringToDefaultFormat } from '../../../../shared/utils/date-utils.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import {
-	setDateKeyboard,
-	SetDateKeyboardCommand,
-	SetDateKeyboardPayload,
-} from '../../../keyboards/setDate.keyboard.js';
+import { getDateKeyboard } from '../../../keyboards/date.keyboard.js';
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
@@ -21,7 +17,7 @@ export const updateDateStep: SceneStepWithDependencies<
 	if (context.scene.step.firstTime) {
 		return await context.send(
 			`Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.`,
-			{ keyboard: setDateKeyboard }
+			{ keyboard: getDateKeyboard() }
 		);
 	}
 

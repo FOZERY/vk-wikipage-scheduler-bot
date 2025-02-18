@@ -40,14 +40,10 @@ export class EventsController {
 				}
 
 				const startOfMonthRange = dayjs().tz().startOf('M');
-				const endOfMonthRange = startOfMonthRange
-					.add(1, 'month')
-					.add(14, 'day');
 				const getEventsByDateRangeResult =
 					await this.eventsRepository.getEventsByDateRange(
 						{
 							startDate: startOfMonthRange.format('YYYY-MM-DD'),
-							endDate: endOfMonthRange.format('YYYY-MM-DD'),
 						},
 						tx
 					);
@@ -195,15 +191,11 @@ export class EventsController {
 					}
 
 					const startOfMonthRange = dayjs().tz().startOf('M');
-					const endOfMonthRange = startOfMonthRange
-						.add(1, 'month')
-						.add(14, 'day');
 					const getEventsByDateRangeResult =
 						await this.eventsRepository.getEventsByDateRange(
 							{
 								startDate:
 									startOfMonthRange.format('YYYY-MM-DD'),
-								endDate: endOfMonthRange.format('YYYY-MM-DD'),
 							},
 							tx
 						);
@@ -291,15 +283,11 @@ export class EventsController {
 					}
 
 					const startOfMonthRange = dayjs().tz().startOf('M');
-					const endOfMonthRange = startOfMonthRange
-						.add(1, 'month')
-						.add(14, 'day');
 					const getEventsByDateRangeResult =
 						await this.eventsRepository.getEventsByDateRange(
 							{
 								startDate:
 									startOfMonthRange.format('YYYY-MM-DD'),
-								endDate: endOfMonthRange.format('YYYY-MM-DD'),
 							},
 							tx
 						);

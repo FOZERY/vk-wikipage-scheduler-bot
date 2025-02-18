@@ -164,7 +164,13 @@ export class EventsRepositoryImpl implements EventsRepository {
 				.select()
 				.from(eventsTable)
 				.where(
-					between(eventsTable.date, month.startDate, month.endDate)
+					month.endDate
+						? between(
+								eventsTable.date,
+								month.startDate,
+								month.endDate
+						  )
+						: gte(eventsTable.date, month.startDate)
 				)
 				.orderBy(
 					asc(eventsTable.date),

@@ -1,5 +1,5 @@
-export const EVENT_SCENE_NAMES = {
-	addEvent: 'addEventScene',
-	deleteEvent: 'deleteEventScene',
-	updateEvent: 'updateEventScene',
-} as const;
+export enum EventSceneEnum {
+	addEvent = 'addEventScene',
+	deleteEvent = 'deleteEventScene',
+	updateEvent = 'updateEventScene',
+}

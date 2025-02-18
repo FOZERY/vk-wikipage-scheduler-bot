@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { err, ok } from 'neverthrow';
+import { invalidFormatErr } from '../errors/index.js';
 
 export function parseTimeString(input: string) {
 	const timeRangeRegex = /(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/;
@@ -15,11 +16,11 @@ export function parseTimeString(input: string) {
 		const endTime = dayjs(rawEndTime, 'HH:mm', true);
 
 		if (!endTime.isValid() || !startTime.isValid()) {
-			return err('Invalid time type');
+			return err(invalidFormatErr(input, 'HH:mm - HH:mm'));
 		}
 
 		if (startTime.diff(endTime) > 0) {
-			return err(`startTime can't be more than endTime`);
+			return err(invalidFormatErr(input, 'HH:mm - HH:mm'));
 		}
 
 		startTimeString = startTime.format('HH:mm:ss');
@@ -30,13 +31,13 @@ export function parseTimeString(input: string) {
 
 		const startTime = dayjs(rawStartTime, 'HH:mm', true);
 		if (!startTime.isValid()) {
-			return err('Invalid time type');
+			return err(invalidFormatErr(rawStartTime, 'HH:mm'));
 		}
 
 		startTimeString = startTime.format('HH:mm:ss');
 		endTimeString = null;
 	} else {
-		return err('Invalid time type');
+		return err(invalidFormatErr(input, 'HH:mm - HH:mm'));
 	}
 
 	return ok({ startTimeString, endTimeString });

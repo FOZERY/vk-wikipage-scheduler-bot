@@ -1,18 +1,8 @@
 import { MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
-import { convertRussianDateStringToDefaultFormat } from '../../../../shared/utils/date-utils.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { parseTimeString } from '../../../../shared/utils/time-utils.js';
-import {
-	setDateKeyboard,
-	SetDateKeyboardCommand,
-	SetDateKeyboardPayload,
-} from '../../../keyboards/setDate.keyboard.js';
-import {
-	setTimeKeyboard,
-	SetTimeKeyboardPayload,
-	SetTimeKeyboardPayloadCommand,
-} from '../../../keyboards/setTime.keyboard.js';
+import { getTimeKeyboard } from '../../../keyboards/time.keyboard.js';
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
@@ -34,7 +24,7 @@ export const updateTimeStep: SceneStepWithDependencies<
 3. - (если времени нет) 
 				
 Либо выбери один из вариантов на клавиатуре.`,
-			{ keyboard: setTimeKeyboard }
+			{ keyboard: getTimeKeyboard() }
 		);
 	}
 

@@ -1,9 +1,15 @@
+import { log } from 'console';
 import { MessageContext } from 'vk-io';
-
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import {
+	attachTextButtonToKeyboard,
+	leaveButtonOptions,
+	previousButtonOptions,
+} from '../../../../shared/utils/keyboard-utils.js';
+import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { parseTimeString } from '../../../../shared/utils/time-utils.js';
-import { setTimeKeyboard } from '../../../keyboards/setTime.keyboard.js';
+import { getTimeKeyboard } from '../../../keyboards/time.keyboard.js';
 import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
 
 export const timeStep: SceneStepWithDependencies<
@@ -12,6 +18,11 @@ export const timeStep: SceneStepWithDependencies<
 	AddEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
+		logStep(
+			context,
+			`User ${context.senderId} -> entered time scene step`,
+			'info'
+		);
 		return await context.send(
 			`		
 Введи время в одном из форматов: 
@@ -20,8 +31,16 @@ export const timeStep: SceneStepWithDependencies<
 2. ЧЧ:ММ
 3. - (если времени нет) 
 			
-Либо выбери один из вариантов на клавиатуре.`,
-			{ keyboard: setTimeKeyboard }
+Либо выбери один из вариантов на клавиатуре.
+
+/previous - назад
+/leave - отмена`,
+			{
+				keyboard: attachTextButtonToKeyboard(getTimeKeyboard(), [
+					previousButtonOptions,
+					leaveButtonOptions,
+				]),
+			}
 		);
 	}
 
@@ -37,15 +56,27 @@ export const timeStep: SceneStepWithDependencies<
 			case 'previous': {
 				return await context.scene.step.previous();
 			}
-			default: {
+			case 'setTime': {
 				context.scene.state.startTime =
 					context.messagePayload.startTime;
 				context.scene.state.endTime = context.messagePayload.endTime;
 				break;
 			}
+			default: {
+				logStep(context, 'unknown command in time step', 'error');
+				throw new Error('unknown command');
+			}
 		}
 	} else {
 		const trimmedText = context.text.trim();
+
+		if (trimmedText.toLocaleLowerCase() === '/leave') {
+			return await context.scene.leave();
+		}
+
+		if (trimmedText.toLocaleLowerCase() === '/previous') {
+			return await context.scene.step.previous();
+		}
 
 		if (trimmedText === '-') {
 			context.scene.state.startTime = null;
@@ -54,12 +85,13 @@ export const timeStep: SceneStepWithDependencies<
 			const result = parseTimeString(trimmedText);
 
 			if (result.isErr()) {
-				if (result.error === 'Invalid time type') {
-					return await context.reply('Неверный формат времени.');
-				} else
-					return await context.reply(
-						'Время начала события не может быть больше времени окончания.'
-					);
+				logStep(
+					context,
+					`User ${context.senderId} -> entered invalid time`,
+					'warn',
+					result.error
+				);
+				return await context.reply('Неверный формат времени.');
 			}
 
 			context.scene.state.startTime = result.value.startTimeString;
@@ -67,5 +99,6 @@ export const timeStep: SceneStepWithDependencies<
 		}
 	}
 
+	logStep(context, `User ${context.senderId} -> passed time step`, 'info');
 	return await context.scene.step.next();
 };

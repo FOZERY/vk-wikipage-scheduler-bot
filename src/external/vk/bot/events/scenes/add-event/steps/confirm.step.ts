@@ -1,9 +1,18 @@
 import dayjs from 'dayjs';
-import { MessageContext } from 'vk-io';
+import { Keyboard, MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import {
+	attachTextButtonToKeyboard,
+	leaveButtonOptions,
+	previousButtonOptions,
+} from '../../../../shared/utils/keyboard-utils.js';
+import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
 import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
-import { confirmKeyboard } from '../../../keyboards/confirm.keyboard.js';
+import {
+	confirmKeyboard,
+	getConfirmKeyboard,
+} from '../../../keyboards/confirm.keyboard.js';
 import { AddEventSceneDependencies, AddEventSceneState } from '../types.js';
 
 export const confirmStep: SceneStepWithDependencies<
@@ -12,6 +21,12 @@ export const confirmStep: SceneStepWithDependencies<
 	AddEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
+		logStep(
+			context,
+			`User ${context.senderId} -> entered confirm scene step`,
+			'info'
+		);
+
 		const dateFormattedString = dayjs(context.scene.state.date)
 			.tz()
 			.format('DD.MM.YYYY');
@@ -26,10 +41,27 @@ export const confirmStep: SceneStepWithDependencies<
 			)}			
 Место: ${context.scene.state.place}	
 Название: ${context.scene.state.title}
-Организатор: ${context.scene.state.organizer || 'Не указан'}				
+Организатор: ${context.scene.state.organizer || 'Не указан'}
+
+Подтвердить создание события?
+
+/confirm - подтвердить
+/restartScene - начать заново
+/previous - назад
+/leave - отмена
 			`,
 			{
-				keyboard: confirmKeyboard,
+				keyboard: attachTextButtonToKeyboard(getConfirmKeyboard(), [
+					previousButtonOptions,
+					leaveButtonOptions,
+					{
+						label: 'Начать заново',
+						payload: {
+							command: 'restartScene',
+						},
+						color: Keyboard.SECONDARY_COLOR,
+					},
+				]),
 			}
 		);
 	}
@@ -54,13 +86,30 @@ export const confirmStep: SceneStepWithDependencies<
 			case 'confirm': {
 				break;
 			}
+			default: {
+				logStep(context, 'Unknown command', 'error');
+				throw new Error('Unknown command');
+			}
 		}
 	} else {
 		const trimmedText = context.text.trim();
-		if (!trimmedText.toLowerCase().includes('подтвердить')) {
-			return await context.reply(
-				'Для подтверждения создания события напишите "Подтвердить".'
-			);
+		switch (trimmedText.toLowerCase()) {
+			case '/previous': {
+				return await context.scene.step.previous();
+			}
+			case '/leave': {
+				return await context.scene.leave();
+			}
+			case '/restartscene': {
+				context.scene.reset();
+				return await context.scene.enter('dateStep');
+			}
+			case '/confirm': {
+				break;
+			}
+			default: {
+				return await context.reply('Неизвестная команда');
+			}
 		}
 	}
 
@@ -74,11 +123,16 @@ export const confirmStep: SceneStepWithDependencies<
 	});
 
 	if (result.isErr()) {
-		console.error(result.error);
+		logStep(
+			context,
+			`User ${context.senderId} -> error while creating event`,
+			'error',
+			result.error
+		);
 		await context.send('Ошибка сервиса.');
 	}
 
+	logStep(context, `User ${context.senderId} -> passed confirm step`, 'info');
 	await context.send('Событие успешно создано');
-
 	return await context.scene.leave();
 };

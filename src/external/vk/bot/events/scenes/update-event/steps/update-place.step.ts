@@ -1,12 +1,7 @@
 import { MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { setOgranizerKeyboard } from '../../../keyboards/setOrganizer.keyboard.js';
-import {
-	setPlaceKeyboard,
-	SetPlaceKeyboardPayload,
-	SetPlaceKeyboardPayloadCommand,
-} from '../../../keyboards/setPlace.keyboard.js';
+import { getPlaceKeyboard } from '../../../keyboards/place.keyboard.js';
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
@@ -21,7 +16,7 @@ export const updatePlaceStep: SceneStepWithDependencies<
 	if (context.scene.step.firstTime) {
 		return await context.send(
 			`Введи название места события или выбери с клавиатуры.`,
-			{ keyboard: setPlaceKeyboard }
+			{ keyboard: getPlaceKeyboard() }
 		);
 	}
 

@@ -1,12 +1,7 @@
 import { MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import {
-	setOgranizerKeyboard,
-	SetOrganizerKeyboardPayload,
-	SetOrganizerKeyboardPayloadCommand,
-} from '../../../keyboards/setOrganizer.keyboard.js';
-import { SetPlaceKeyboardPayload } from '../../../keyboards/setPlace.keyboard.js';
+import { getOrganizerKeyboard } from '../../../keyboards/organizer.keyboard.js';
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
@@ -20,7 +15,7 @@ export const updateOrganizerStep: SceneStepWithDependencies<
 > = async (context) => {
 	if (context.scene.step.firstTime) {
 		return await context.send(`Введи имя организатора.`, {
-			keyboard: setOgranizerKeyboard,
+			keyboard: getOrganizerKeyboard(),
 		});
 	}
 

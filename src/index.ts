@@ -8,9 +8,10 @@ import { updateEventCommand } from './external/vk/bot/events/commands/updateEven
 import { addEventScene } from './external/vk/bot/events/scenes/add-event/add-event.scene.js';
 import { deleteEventScene } from './external/vk/bot/events/scenes/delete-event/delete-event.scene.js';
 import { updateEventScene } from './external/vk/bot/events/scenes/update-event/update-event.scene.js';
-import { mainMenuKeyboard } from './external/vk/bot/shared/keyboards/mainMenu.keyboard.js';
+import { mainMenuKeyboard } from './external/vk/bot/shared/keyboards/main-menu.keyboard.js';
 import { mainMenuMessage } from './external/vk/bot/shared/messages/mainMenu.message.js';
 import { onFallbackMessage } from './external/vk/bot/shared/messages/onFallback.message..js';
+import { getContextPartForLogging } from './external/vk/bot/shared/utils/logger-messages.js';
 
 const vk = new VKExtend({
 	token: process.env.LONGPOLL_TOKEN!,
@@ -22,26 +23,11 @@ const vk = new VKExtend({
 vk.addScenes([addEventScene, deleteEventScene, updateEventScene]);
 
 vk.hear(
-	[{ 'messagePayload.command': 'createEvent' }, { text: '/add' }],
+	[{ 'messagePayload.command': 'addEvent' }, { text: '/add' }],
 	async (context) => {
-		logger.debug(
-			context,
-			`ADD_EVENT COMMAND from user ${context.senderId}`
-		);
 		logger.info(
-			{
-				eventType: context.eventType,
-				event: context.eventText,
-				msgPayload: context.messagePayload,
-				text: context.text,
-				user: {
-					id: context.senderId,
-					clientInfo: context.clientInfo,
-				},
-				createdAt: context.createdAt,
-				updatedAt: context.updatedAt,
-			},
-			`ADD_EVENT COMMAND from user ${context.senderId}`
+			{ context: getContextPartForLogging(context) },
+			`User ${context.senderId} -> send "add_event" command`
 		);
 
 		await addEventCommand(context);
@@ -52,19 +38,8 @@ vk.hear(
 
 	async (context) => {
 		logger.info(
-			{
-				eventType: context.eventType,
-				event: context.eventText,
-				msgPayload: context.messagePayload,
-				text: context.text,
-				user: {
-					id: context.senderId,
-					clientInfo: context.clientInfo,
-				},
-				createdAt: context.createdAt,
-				updatedAt: context.updatedAt,
-			},
-			`UPDATE_EVENT COMMAND from user ${context.senderId}`
+			{ context: getContextPartForLogging(context) },
+			`User ${context.senderId} -> send "update_event" command`
 		);
 		await updateEventCommand(context);
 	}
@@ -73,19 +48,8 @@ vk.hear(
 	[{ 'messagePayload.command': 'deleteEvent' }, { text: '/delete' }],
 	async (context) => {
 		logger.info(
-			{
-				eventType: context.eventType,
-				event: context.eventText,
-				msgPayload: context.messagePayload,
-				text: context.text,
-				user: {
-					id: context.senderId,
-					clientInfo: context.clientInfo,
-				},
-				createdAt: context.createdAt,
-				updatedAt: context.updatedAt,
-			},
-			'DELETE_EVENT'
+			{ context: getContextPartForLogging(context) },
+			`User ${context.senderId} -> send "delete_event" command`
 		);
 		await deleteEventCommand(context);
 	}
@@ -98,19 +62,8 @@ vk.hear(
 	],
 	async (context) => {
 		logger.info(
-			{
-				eventType: context.eventType,
-				event: context.eventText,
-				msgPayload: context.messagePayload,
-				text: context.text,
-				user: {
-					id: context.senderId,
-					clientInfo: context.clientInfo,
-				},
-				createdAt: context.createdAt,
-				updatedAt: context.updatedAt,
-			},
-			`START COMMAND from user ${context.senderId}`
+			{ context: getContextPartForLogging(context) },
+			`User ${context.senderId} -> send "start" command`
 		);
 		await context.send(mainMenuMessage, {
 			keyboard: mainMenuKeyboard,
@@ -121,33 +74,27 @@ vk.hear(
 vk.hearOnFallback(async (context) => {
 	logger.warn(
 		{
-			eventType: context.eventType,
-			event: context.eventText,
-			msgPayload: context.messagePayload,
-			text: context.text,
-			user: {
-				id: context.senderId,
-				clientInfo: context.clientInfo,
-			},
-			createdAt: context.createdAt,
-			updatedAt: context.updatedAt,
+			context: getContextPartForLogging(context),
 		},
-		`ON_FALLBACK from user ${context.senderId}`
+		`User ${context.senderId} -> on fallback executed`
 	);
 	await context.send(onFallbackMessage, {
 		keyboard: mainMenuKeyboard,
 	});
 });
 
-vk.updates.startPolling().then(() => logger.info('Bot started!'));
+vk.updates.startPolling().then(() => logger.info('Polling started'));
 
 process.on('uncaughtException', async (error) => {
 	logger.fatal(error);
+	logger.warn('Stopping polling...');
 	await vk.updates.stop();
 	process.exit(1);
 });
+
 process.on('unhandledRejection', async (error) => {
 	logger.fatal(error);
+	logger.warn('Stopping polling...');
 	await vk.updates.stop();
 	process.exit(1);
 });

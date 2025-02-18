@@ -17,7 +17,7 @@ export interface CreateEventDTO {
 
 export interface GetEventsByDateRangeDTO {
 	startDate: string;
-	endDate: string;
+	endDate?: string;
 }
 
 export interface UpdateEventDTO {

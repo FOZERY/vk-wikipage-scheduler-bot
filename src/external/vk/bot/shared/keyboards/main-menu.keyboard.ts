@@ -5,7 +5,7 @@ export const mainMenuKeyboard = Keyboard.builder()
 		label: 'Добавить в расписание',
 		color: Keyboard.POSITIVE_COLOR,
 		payload: {
-			command: 'createEvent',
+			command: 'addEvent',
 		},
 	})
 	.row()

@@ -1,9 +1,9 @@
 import { MessageContext } from 'vk-io';
 import { eventsController } from '../../../../../../modules/events/index.js';
-import { mainMenuKeyboard } from '../../../shared/keyboards/mainMenu.keyboard.js';
+import { mainMenuKeyboard } from '../../../shared/keyboards/main-menu.keyboard.js';
 import { mainMenuMessage } from '../../../shared/messages/mainMenu.message.js';
 import { createScene } from '../../../shared/utils/scene-utils.js';
-import { EVENT_SCENE_NAMES } from '../../types/events.types.js';
+import { EventSceneEnum } from '../../types/events.types.js';
 import { confirmStep } from './steps/confirm.step.js';
 import { findEventStep } from './steps/find-event.step.js';
 import {
@@ -15,7 +15,7 @@ export const deleteEventScene = createScene<
 	MessageContext,
 	DeleteEventSceneState,
 	DeleteEventSceneDependencies
->(EVENT_SCENE_NAMES.deleteEvent, [findEventStep, confirmStep], {
+>(EventSceneEnum.deleteEvent, [findEventStep, confirmStep], {
 	dependencies: {
 		eventsController: eventsController,
 	},
