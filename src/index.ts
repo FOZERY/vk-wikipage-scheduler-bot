@@ -1,6 +1,5 @@
 import './shared/dayjs.init.js';
 
-import { Config, OneTap } from '@vkid/sdk';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { getScheduleCronJob } from './external/cron/renderCron.js';
 import { logger } from './external/logger/pino.js';
@@ -31,8 +30,6 @@ const vk = new VKExtend({
 });
 
 vk.addScenes([addEventScene, deleteEventScene, updateEventScene]);
-
-vk.hear('/login', async (context) => {});
 
 vk.hear(
 	[{ 'messagePayload.command': 'addEvent' }, { text: '/add' }],
