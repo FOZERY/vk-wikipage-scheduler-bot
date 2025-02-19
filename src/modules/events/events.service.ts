@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { err, ok, Result } from 'neverthrow';
-import { ScheduleRenderer } from '../../external/vk/api/wiki/schedule/schedule-renderer.js';
+import { ScheduleService } from '../../external/vk/api/wiki/schedule/schedule-renderer.js';
 import {
 	CreateEventDTO,
 	FindCollisionsByDateTimePlaceDTO,
@@ -11,9 +11,9 @@ import {
 import { EventEntity } from './event.entity.js';
 import { EventsRepository } from './events.repository.js';
 
-export class EventsController {
+export class EventsService {
 	constructor(
-		private readonly scheduleRenderer: ScheduleRenderer,
+		private readonly scheduleService: ScheduleService,
 		private readonly eventsRepository: EventsRepository,
 		private readonly db: PostgresJsDatabase
 	) {}
@@ -39,23 +39,8 @@ export class EventsController {
 					throw result.error;
 				}
 
-				const startOfMonthRange = dayjs().tz().startOf('M');
-				const getEventsByDateRangeResult =
-					await this.eventsRepository.getEventsByDateRange(
-						{
-							startDate: startOfMonthRange.format('YYYY-MM-DD'),
-						},
-						tx
-					);
-
-				if (getEventsByDateRangeResult.isErr()) {
-					throw getEventsByDateRangeResult.error;
-				}
-
-				const eventsForRender = getEventsByDateRangeResult.value;
-				const renderResult = await this.scheduleRenderer.renderSchedule(
-					eventsForRender
-				);
+				const renderResult =
+					await this.renderScheduleFromCurrentMonth();
 
 				if (renderResult.isErr()) {
 					throw renderResult.error;
@@ -190,26 +175,8 @@ export class EventsController {
 						throw createResult.error;
 					}
 
-					const startOfMonthRange = dayjs().tz().startOf('M');
-					const getEventsByDateRangeResult =
-						await this.eventsRepository.getEventsByDateRange(
-							{
-								startDate:
-									startOfMonthRange.format('YYYY-MM-DD'),
-							},
-							tx
-						);
-
-					if (getEventsByDateRangeResult.isErr()) {
-						throw getEventsByDateRangeResult.error;
-					}
-
-					const eventsForRender = getEventsByDateRangeResult.value;
 					const renderResult =
-						await this.scheduleRenderer.renderSchedule(
-							eventsForRender
-						);
-
+						await this.renderScheduleFromCurrentMonth();
 					if (renderResult.isErr()) {
 						throw renderResult.error;
 					}
@@ -282,23 +249,8 @@ export class EventsController {
 						throw updateResult.error;
 					}
 
-					const startOfMonthRange = dayjs().tz().startOf('M');
-					const getEventsByDateRangeResult =
-						await this.eventsRepository.getEventsByDateRange(
-							{
-								startDate:
-									startOfMonthRange.format('YYYY-MM-DD'),
-							},
-							tx
-						);
-
-					if (getEventsByDateRangeResult.isErr()) {
-						throw getEventsByDateRangeResult.error;
-					}
-
-					const renderResult = await this.renderSchedule(
-						getEventsByDateRangeResult.value
-					);
+					const renderResult =
+						await this.renderScheduleFromCurrentMonth();
 					if (renderResult.isErr()) {
 						throw renderResult.error;
 					}
@@ -314,10 +266,25 @@ export class EventsController {
 		}
 	}
 
-	private async renderSchedule(
-		events: EventEntity[]
+	public async renderScheduleFromCurrentMonth(
+		tx?: unknown
 	): Promise<Result<void, unknown>> {
-		const renderResult = await this.scheduleRenderer.renderSchedule(events);
+		const startOfRange = dayjs().tz().startOf('M');
+		const getEventsByDateRangeResult =
+			await this.eventsRepository.getEventsByDateRange(
+				{
+					startDate: startOfRange.format('YYYY-MM-DD'),
+				},
+				tx
+			);
+
+		if (getEventsByDateRangeResult.isErr()) {
+			return err(getEventsByDateRangeResult.error);
+		}
+
+		const renderResult = await this.scheduleService.renderSchedule(
+			getEventsByDateRangeResult.value
+		);
 
 		if (renderResult.isErr()) {
 			return err(renderResult.error);

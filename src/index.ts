@@ -1,5 +1,6 @@
 import './shared/dayjs.init.js';
 
+import { getScheduleCronJob } from './external/cron/renderCron.js';
 import { logger } from './external/logger/pino.js';
 import { VKExtend } from './external/vk/bot/bot.js';
 import { addEventCommand } from './external/vk/bot/events/commands/addEvent.command.js';
@@ -12,6 +13,7 @@ import { mainMenuKeyboard } from './external/vk/bot/shared/keyboards/main-menu.k
 import { mainMenuMessage } from './external/vk/bot/shared/messages/mainMenu.message.js';
 import { onFallbackMessage } from './external/vk/bot/shared/messages/onFallback.message..js';
 import { getContextPartForLogging } from './external/vk/bot/shared/utils/logger-messages.js';
+import { eventsService } from './modules/events/index.js';
 
 const vk = new VKExtend({
 	token: process.env.LONGPOLL_TOKEN!,
@@ -83,7 +85,12 @@ vk.hearOnFallback(async (context) => {
 	});
 });
 
-vk.updates.startPolling().then(() => logger.info('Polling started'));
+vk.updates.startPolling().then(() => {
+	logger.info('Polling started');
+	const renderJob = getScheduleCronJob(eventsService);
+	renderJob.start();
+	logger.info('Cron renderJob started');
+});
 
 process.on('uncaughtException', async (error) => {
 	logger.fatal(error);

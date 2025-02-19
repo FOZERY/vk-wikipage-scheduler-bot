@@ -1,7 +1,7 @@
 import { Logger } from 'pino';
 import { MessageContext } from 'vk-io';
-import { EventsController } from '../../../../../../modules/events/events.controller.js';
-import { eventsController } from '../../../../../../modules/events/index.js';
+import { EventsService } from '../../../../../../modules/events/events.service.js';
+import { eventsService } from '../../../../../../modules/events/index.js';
 import { logger } from '../../../../../logger/pino.js';
 import { mainMenuKeyboard } from '../../../shared/keyboards/main-menu.keyboard.js';
 import { mainMenuMessage } from '../../../shared/messages/mainMenu.message.js';
@@ -27,7 +27,7 @@ export type AddEventSceneState = {
 };
 
 export type AddEventSceneDependencies = {
-	eventsController: EventsController;
+	eventsController: EventsService;
 	logger: Logger;
 };
 
@@ -40,7 +40,7 @@ export const addEventScene = createScene<
 	[dateStep, timeStep, organizerStep, titleStep, placeStep, confirmStep],
 	{
 		dependencies: {
-			eventsController: eventsController,
+			eventsController: eventsService,
 			logger: logger.child({
 				scene: 'add-event',
 			}),

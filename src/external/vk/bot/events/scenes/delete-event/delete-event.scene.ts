@@ -1,8 +1,8 @@
 import { Logger } from 'pino';
 import { MessageContext } from 'vk-io';
 import { EventEntity } from '../../../../../../modules/events/event.entity.js';
-import { EventsController } from '../../../../../../modules/events/events.controller.js';
-import { eventsController } from '../../../../../../modules/events/index.js';
+import { EventsService } from '../../../../../../modules/events/events.service.js';
+import { eventsService } from '../../../../../../modules/events/index.js';
 import { logger } from '../../../../../logger/pino.js';
 import { mainMenuKeyboard } from '../../../shared/keyboards/main-menu.keyboard.js';
 import { mainMenuMessage } from '../../../shared/messages/mainMenu.message.js';
@@ -16,7 +16,7 @@ export type DeleteEventSceneState = {
 };
 
 export type DeleteEventSceneDependencies = {
-	eventsController: EventsController;
+	eventsController: EventsService;
 	logger: Logger;
 };
 
@@ -26,7 +26,7 @@ export const deleteEventScene = createScene<
 	DeleteEventSceneDependencies
 >(EventSceneEnum.deleteEvent, [findEventStep, confirmStep], {
 	dependencies: {
-		eventsController: eventsController,
+		eventsController: eventsService,
 		logger: logger.child({
 			scene: 'delete-event',
 		}),

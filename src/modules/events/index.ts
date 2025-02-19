@@ -1,16 +1,16 @@
 import { db } from '../../external/db/drizzle/index.js';
-import { ScheduleRenderer } from '../../external/vk/api/wiki/schedule/schedule-renderer.js';
-import { EventsController } from './events.controller.js';
+import { ScheduleService } from '../../external/vk/api/wiki/schedule/schedule-renderer.js';
+import { EventsService } from './events.service.js';
 import { EventsRepositoryImpl } from './external/db/drizzle/events.repository.impl.js';
 
 const eventsRepository = new EventsRepositoryImpl(db);
 
-const scheduleRenderer = new ScheduleRenderer({
+const scheduleRenderer = new ScheduleService({
 	groupId: Number(process.env.GROUP_ID),
 	pageId: Number(process.env.PAGE_ID),
 });
 
-export const eventsController = new EventsController(
+export const eventsService = new EventsService(
 	scheduleRenderer,
 	eventsRepository,
 	db

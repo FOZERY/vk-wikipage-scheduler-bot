@@ -9,23 +9,8 @@ export type ScheduleRendererConfig = {
 	groupId: number;
 };
 
-export class ScheduleRenderer {
+export class ScheduleService {
 	constructor(private readonly config: ScheduleRendererConfig) {}
-
-	private generateSchedule(events: EventEntity[]): string {
-		let newSchedule = events.reduce((acc, event) => {
-			return `${acc}|-\n| ${dayjs(event.date).format(
-				'DD.MM.YYYY'
-			)}\n| ${timeRangeToStringOutput(
-				event.startTime,
-				event.endTime
-			)}\n| ${event.title}\n| ${event.place}\n| ${
-				event.organizer ?? 'Не указано'
-			}\n`;
-		}, '');
-		newSchedule = `{|\n${newSchedule}|}`;
-		return newSchedule;
-	}
 
 	public async renderSchedule(
 		events: EventEntity[]
@@ -43,5 +28,20 @@ export class ScheduleRenderer {
 		} catch (error) {
 			return err(error);
 		}
+	}
+
+	private generateSchedule(events: EventEntity[]): string {
+		let newSchedule = events.reduce((acc, event) => {
+			return `${acc}|-\n| ${dayjs(event.date).format(
+				'DD.MM.YYYY'
+			)}\n| ${timeRangeToStringOutput(
+				event.startTime,
+				event.endTime
+			)}\n| ${event.title}\n| ${event.place}\n| ${
+				event.organizer ?? 'Не указано'
+			}\n`;
+		}, '');
+		newSchedule = `{|\n${newSchedule}|}`;
+		return newSchedule;
 	}
 }
