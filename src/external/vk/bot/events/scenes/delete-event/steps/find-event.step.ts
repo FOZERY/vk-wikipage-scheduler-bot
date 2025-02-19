@@ -66,7 +66,7 @@ export const findEventStep: SceneStepWithDependencies<
 		const trimmedText = context.text.trim();
 
 		const result =
-			await context.dependencies.eventsController.findEventsByTitleOrDate(
+			await context.dependencies.eventsService.findEventsByTitleOrDate(
 				trimmedText
 			);
 		if (result.isErr()) {

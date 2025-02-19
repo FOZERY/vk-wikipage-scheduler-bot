@@ -16,7 +16,7 @@ export type DeleteEventSceneState = {
 };
 
 export type DeleteEventSceneDependencies = {
-	eventsController: EventsService;
+	eventsService: EventsService;
 	logger: Logger;
 };
 
@@ -26,7 +26,7 @@ export const deleteEventScene = createScene<
 	DeleteEventSceneDependencies
 >(EventSceneEnum.deleteEvent, [findEventStep, confirmStep], {
 	dependencies: {
-		eventsController: eventsService,
+		eventsService: eventsService,
 		logger: logger.child({
 			scene: 'delete-event',
 		}),

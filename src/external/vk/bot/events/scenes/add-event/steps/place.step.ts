@@ -82,7 +82,7 @@ export const organizerStep: SceneStepWithDependencies<
 	}
 
 	const result =
-		await context.dependencies.eventsController.findCollisionsInSchedule({
+		await context.dependencies.eventsService.findCollisionsInSchedule({
 			date: context.scene.state.date,
 			startTime: context.scene.state.startTime,
 			endTime: context.scene.state.endTime,

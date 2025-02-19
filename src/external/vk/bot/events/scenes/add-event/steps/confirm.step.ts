@@ -95,7 +95,7 @@ export const confirmStep: SceneStepWithDependencies<
 		return await context.reply('Воспользуйся клавиатурой');
 	}
 
-	const result = await context.dependencies.eventsController.create({
+	const result = await context.dependencies.eventsService.create({
 		date: context.scene.state.date,
 		place: context.scene.state.place,
 		startTime: context.scene.state.startTime,

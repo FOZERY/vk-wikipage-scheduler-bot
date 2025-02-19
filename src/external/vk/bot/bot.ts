@@ -1,7 +1,12 @@
 import { AllowArray, HearConditions, HearManager } from '@vk-io/hear';
 import { IScene, Middleware, SceneManager } from '@vk-io/scenes';
 import { SessionManager } from '@vk-io/session';
-import { VK as _VK, MessageContextSubType, MessageContextType } from 'vk-io';
+import {
+	VK as _VK,
+	Context,
+	MessageContextSubType,
+	MessageContextType,
+} from 'vk-io';
 import { MessageContextWithScene } from './shared/types/context.type.js';
 
 type VKOptions = {
@@ -9,7 +14,13 @@ type VKOptions = {
 	preventOutbox: boolean;
 	preventChat: boolean;
 	hearEvents: AllowArray<MessageContextType | MessageContextSubType>;
+	errorHandler?: VKErrorHandler;
 };
+
+type VKErrorHandler = (
+	error: unknown,
+	context?: Context
+) => Promise<void> | void;
 
 export class VKExtend extends _VK {
 	private hearManager: HearManager<MessageContextWithScene>;
@@ -24,23 +35,35 @@ export class VKExtend extends _VK {
 		this.sessionManager = new SessionManager();
 		this.sceneManager = new SceneManager();
 
+		this.updates.use(async (context, next) => {
+			try {
+				await next();
+			} catch (error) {
+				if (options.errorHandler) {
+					await options.errorHandler(error, context);
+				} else {
+					throw error;
+				}
+			}
+		});
+
 		if (options.preventOutbox) {
-			this.updates.use((context, next) => {
+			this.updates.use(async (context, next) => {
 				if (context.isOutbox) {
 					return;
 				}
 
-				return next();
+				await next();
 			});
 		}
 
 		if (options.preventChat) {
-			this.updates.use((context, next) => {
+			this.updates.use(async (context, next) => {
 				if (context.isChat) {
 					return;
 				}
 
-				return next();
+				await next();
 			});
 		}
 

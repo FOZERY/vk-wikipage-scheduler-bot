@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
+import { create } from 'domain';
 import { err, ok, Result } from 'neverthrow';
+import { createValidationError, ValidationError } from '../../shared/errors.js';
 
 export interface EventEntityProps {
 	id?: number;
@@ -17,14 +19,18 @@ export interface EventEntityProps {
 export class EventEntity {
 	private constructor(private props: EventEntityProps) {}
 
-	public static create(props: EventEntityProps): Result<EventEntity, Error> {
+	public static create(
+		props: EventEntityProps
+	): Result<EventEntity, ValidationError> {
 		if (
 			props.startTime &&
 			!dayjs(props.startTime, 'HH:mm:ss', true).isValid()
 		) {
 			return err(
-				Error(
-					'Validation error: startTime must be in the format HH:mm:ss'
+				createValidationError(
+					'startTime must be in the format HH:mm:ss',
+					props.startTime,
+					'HH:mm:ss'
 				)
 			);
 		}
@@ -33,8 +39,10 @@ export class EventEntity {
 			!dayjs(props.endTime, 'HH:mm:ss', true).isValid()
 		) {
 			return err(
-				Error(
-					'Validation error: endTime must be in the format HH:mm:ss'
+				createValidationError(
+					'endTime must be in the format HH:mm:ss',
+					props.endTime,
+					'HH:mm:ss'
 				)
 			);
 		}
@@ -44,42 +52,59 @@ export class EventEntity {
 			dayjs(props.startTime).isAfter(dayjs(props.endTime))
 		) {
 			return err(
-				Error('Validation error: startTime must be before endTime')
+				createValidationError(
+					'startTime must be before endTime',
+					{ startTime: props.startTime, endTime: props.endTime },
+					'startTime < endTime'
+				)
 			);
 		}
 		if (props.title.length > 255) {
 			return err(
-				Error(
-					'Validation error: title must be less than 255 characters'
+				createValidationError(
+					'title must be less than 255 characters',
+					props.title,
+					'< 255'
 				)
 			);
 		}
 		if (props.place.length > 255) {
 			return err(
-				Error(
-					'Validation error: place must be less than 255 characters'
+				createValidationError(
+					'place must be less than 255 characters',
+					props.place,
+					'< 255'
 				)
 			);
 		}
 		if (props.lastUpdaterId.length > 255) {
 			return err(
-				Error(
-					'Validation error: lastUpdaterId must be less than 255 characters'
+				createValidationError(
+					'lastUpdaterId must be less than 255 characters',
+					props.lastUpdaterId,
+					'< 255'
 				)
 			);
 		}
 		if (props.organizer && props.organizer.length > 255) {
 			return err(
-				Error(
-					'Validation error: organizer must be less than 255 characters'
+				createValidationError(
+					'organizer must be less than 255 characters',
+					props.organizer,
+					'< 255'
 				)
 			);
 		}
 		if (!dayjs(props.date, 'YYYY-MM-DD', true).isValid()) {
 			return err(
-				Error('Validation error: date must be in the format YYYY-MM-DD')
+				createValidationError(
+					'date must be in the format YYYY-MM-DD',
+					props.date,
+					'YYYY-MM-DD'
+				)
 			);
 		}
+
 		return ok(new EventEntity(props));
 	}
 
@@ -137,11 +162,13 @@ export class EventEntity {
 		};
 	}
 
-	public setTitle(title: string): Result<void, Error> {
+	public setTitle(title: string): Result<void, ValidationError> {
 		if (title.length > 255) {
 			return err(
-				Error(
-					'Validation error: title must be less than 255 characters'
+				createValidationError(
+					'title must be less than 255 characters',
+					title,
+					'< 255'
 				)
 			);
 		}
@@ -149,21 +176,27 @@ export class EventEntity {
 		return ok(undefined);
 	}
 
-	public setDate(date: string): Result<void, Error> {
+	public setDate(date: string): Result<void, ValidationError> {
 		if (!dayjs(date, 'YYYY-MM-DD', true).isValid()) {
 			return err(
-				Error('Validation error: date must be in the format YYYY-MM-DD')
+				createValidationError(
+					'date must be in the format YYYY-MM-DD',
+					date,
+					'YYYY-MM-DD'
+				)
 			);
 		}
 		this.props.date = date;
 		return ok(undefined);
 	}
 
-	public setPlace(place: string): Result<void, Error> {
+	public setPlace(place: string): Result<void, ValidationError> {
 		if (place.length > 255) {
 			return err(
-				Error(
-					'Validation error: place must be less than 255 characters'
+				createValidationError(
+					'place must be less than 255 characters',
+					place,
+					'< 255'
 				)
 			);
 		}
@@ -171,11 +204,15 @@ export class EventEntity {
 		return ok(undefined);
 	}
 
-	public setStartTime(startTime: string | null): Result<void, Error> {
+	public setStartTime(
+		startTime: string | null
+	): Result<void, ValidationError> {
 		if (startTime && !dayjs(startTime, 'HH:mm:ss', true).isValid()) {
 			return err(
-				Error(
-					'Validation error: startTime must be in the format HH:mm:ss'
+				createValidationError(
+					'startTime must be in the format HH:mm:ss',
+					startTime,
+					'HH:mm:ss'
 				)
 			);
 		}
@@ -185,39 +222,61 @@ export class EventEntity {
 			dayjs(startTime).isAfter(dayjs(this.props.endTime))
 		) {
 			return err(
-				Error('Validation error: startTime must be before endTime')
-			);
-		}
-		this.props.startTime = startTime;
-		return ok(undefined);
-	}
-
-	public setEndTime(endTime: string | null): Result<void, Error> {
-		if (endTime && !dayjs(endTime, 'HH:mm:ss', true).isValid()) {
-			return err(
-				Error(
-					'Validation error: endTime must be in the format HH:mm:ss'
+				createValidationError(
+					'startTime must be before endTime',
+					{
+						startTime: startTime,
+						endTime: this.props.endTime,
+					},
+					'startTime < endTime'
 				)
 			);
 		}
+		this.props.startTime = startTime;
+
+		return ok(undefined);
+	}
+
+	public setEndTime(endTime: string | null): Result<void, ValidationError> {
+		if (endTime && !dayjs(endTime, 'HH:mm:ss', true).isValid()) {
+			return err(
+				createValidationError(
+					'endTime must be in the format HH:mm:ss',
+					endTime,
+					'HH:mm:ss'
+				)
+			);
+		}
+
 		if (
 			endTime &&
 			this.props.startTime &&
 			dayjs(this.props.startTime).isAfter(dayjs(endTime))
 		) {
 			return err(
-				Error('Validation error: startTime must be before endTime')
+				createValidationError(
+					'startTime must be before endTime',
+					{
+						startTime: this.props.startTime,
+						endTime,
+					},
+					'startTime < endTime'
+				)
 			);
 		}
 		this.props.endTime = endTime;
 		return ok(undefined);
 	}
 
-	public setOrganizer(organizer: string | null): Result<void, Error> {
+	public setOrganizer(
+		organizer: string | null
+	): Result<void, ValidationError> {
 		if (organizer && organizer.length > 255) {
 			return err(
-				Error(
-					'Validation error: organizer must be less than 255 characters'
+				createValidationError(
+					'organizer must be less than 255 characters',
+					organizer,
+					'< 255'
 				)
 			);
 		}
@@ -225,11 +284,13 @@ export class EventEntity {
 		return ok(undefined);
 	}
 
-	public setLastUpdaterId(id: string): Result<void, Error> {
+	public setLastUpdaterId(id: string): Result<void, ValidationError> {
 		if (id.length > 255) {
 			return err(
-				Error(
-					'Validation error: lastUpdaterId must be less than 255 characters'
+				createValidationError(
+					'lastUpdaterId must be less than 255 characters',
+					id,
+					'< 255'
 				)
 			);
 		}

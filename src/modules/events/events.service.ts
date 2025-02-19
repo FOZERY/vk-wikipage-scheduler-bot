@@ -1,7 +1,9 @@
 import dayjs from 'dayjs';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { err, ok, Result } from 'neverthrow';
-import { ScheduleService } from '../../external/vk/api/wiki/schedule/schedule-renderer.js';
+import { Logger } from 'pino';
+import { logger } from '../../external/logger/pino.js';
+import { ScheduleService } from '../../external/vk/api/wiki/schedule/schedule-service.js';
 import {
 	CreateEventDTO,
 	FindCollisionsByDateTimePlaceDTO,
@@ -12,18 +14,29 @@ import { EventEntity } from './event.entity.js';
 import { EventsRepository } from './events.repository.js';
 
 export class EventsService {
+	private logger: Logger;
+
 	constructor(
 		private readonly scheduleService: ScheduleService,
 		private readonly eventsRepository: EventsRepository,
 		private readonly db: PostgresJsDatabase
-	) {}
+	) {
+		this.logger = logger.child({ context: 'events-service' });
+	}
 
 	public async findEventsByTitleOrDate(searchString: string) {
+		this.logger.info(
+			`EventsService -> findEventsByTitleOrDate with searchString '${searchString}' executed`
+		);
 		const result = await this.eventsRepository.findEventsByTitleOrDate(
 			searchString
 		);
 
 		if (result.isErr()) {
+			this.logger.info(
+				result.error,
+				`ERROR in EventsService -> findEventsByTitleOrDate with searchString '${searchString}'`
+			);
 			return err(result.error);
 		}
 
@@ -31,6 +44,9 @@ export class EventsService {
 	}
 
 	public async deleteEventById(id: number) {
+		this.logger.info(
+			`EventsService -> deleteEventById with id '${id}' executed`
+		);
 		try {
 			await this.db.transaction(async (tx) => {
 				const result = await this.eventsRepository.delete(id, tx);
@@ -39,8 +55,9 @@ export class EventsService {
 					throw result.error;
 				}
 
-				const renderResult =
-					await this.renderScheduleFromCurrentMonth();
+				const renderResult = await this.renderScheduleFromCurrentMonth(
+					tx
+				);
 
 				if (renderResult.isErr()) {
 					throw renderResult.error;
@@ -49,6 +66,10 @@ export class EventsService {
 				return;
 			});
 		} catch (error) {
+			this.logger.error(
+				error,
+				`EventsService -> deleteEventById with id '${id}' has error`
+			);
 			return err(error);
 		}
 
@@ -56,7 +77,14 @@ export class EventsService {
 	}
 
 	public async getEventsByDateRange(dto: GetEventsByDateRangeDTO) {
+		this.logger.info(
+			`EventsService -> getEventsByDateRange with startDate '${dto.startDate}' and endDate '${dto.endDate}' executed`
+		);
 		if (!dayjs(dto.startDate, 'YYYY-MM-DD', true).isValid()) {
+			this.logger.warn(
+				{ dto },
+				`EventsService -> getEventsByDateRange Validation error: startDate '${dto.startDate}' must be in the format YYYY-MM-DD`
+			);
 			return err(
 				new Error(
 					'Validation error: startDate must be in the format YYYY-MM-DD'
@@ -64,7 +92,11 @@ export class EventsService {
 			);
 		}
 
-		if (!dayjs(dto.endDate, 'YYYY-MM-DD', true).isValid()) {
+		if (dto.endDate && !dayjs(dto.endDate, 'YYYY-MM-DD', true).isValid()) {
+			this.logger.warn(
+				{ dto },
+				`EventsService -> getEventsByDateRange Validation error: endDate '${dto.endDate}' must be in the format YYYY-MM-DD`
+			);
 			return err(
 				new Error(
 					'Validation error: endDate must be in the format YYYY-MM-DD'
@@ -78,6 +110,10 @@ export class EventsService {
 		});
 
 		if (res.isErr()) {
+			this.logger.warn(
+				{ error: res.error, dto: dto },
+				`EventsService -> getEventsByDateRange with startDate '${dto.startDate}' and endDate '${dto.endDate}' has error`
+			);
 			return err(res.error);
 		}
 
@@ -89,6 +125,10 @@ export class EventsService {
 	) {
 		// Validate date
 		if (!dayjs(dto.date, 'YYYY-MM-DD', true).isValid()) {
+			this.logger.warn(
+				{ dto },
+				`EventsService -> findCollisionsInSchedule Validation error: date ${dto.date} must be in the format YYYY-MM-DD`
+			);
 			return err(
 				new Error(
 					'Validation error: date must be in the format YYYY-MM-DD'
@@ -101,6 +141,10 @@ export class EventsService {
 			dto.startTime &&
 			!dayjs(dto.startTime, 'HH:mm:ss', true).isValid()
 		) {
+			this.logger.warn(
+				{ dto },
+				`EventsService -> findCollisionsInSchedule Validation error: startTime ${dto.startTime} must be in the format HH:mm:ss`
+			);
 			return err(
 				new Error(
 					'Validation error: startTime must be in the format HH:mm:ss'
@@ -110,6 +154,10 @@ export class EventsService {
 
 		// Validate endTime if provided
 		if (dto.endTime && !dayjs(dto.endTime, 'HH:mm:ss', true).isValid()) {
+			this.logger.warn(
+				{ dto },
+				`EventsService -> findCollisionsInSchedule Validation error: endTime ${dto.endTime} must be in the format HH:mm:ss`
+			);
 			return err(
 				new Error(
 					'Validation error: endTime must be in the format HH:mm:ss'
@@ -123,6 +171,10 @@ export class EventsService {
 			dto.endTime &&
 			dayjs(dto.startTime).isAfter(dayjs(dto.endTime))
 		) {
+			this.logger.warn(
+				{ dto },
+				`EventsService -> findCollisionsInSchedule Validation error: startTime ${dto.startTime} must be before ${dto.endTime}`
+			);
 			return err(
 				new Error('Validation error: startTime must be before endTime')
 			);
@@ -132,6 +184,7 @@ export class EventsService {
 			await this.eventsRepository.findCollisionsByDateTimePlace(dto);
 
 		if (result.isErr()) {
+			this.logger.error({ dto, error: result.error });
 			return err(result.error);
 		}
 
@@ -141,6 +194,10 @@ export class EventsService {
 	public async create(event: CreateEventDTO) {
 		const entityResult = EventEntity.create(event);
 		if (entityResult.isErr()) {
+			this.logger.error(
+				entityResult.error,
+				'EventsService -> create: EventEntity create error'
+			);
 			return err(entityResult.error);
 		}
 
@@ -176,7 +233,7 @@ export class EventsService {
 					}
 
 					const renderResult =
-						await this.renderScheduleFromCurrentMonth();
+						await this.renderScheduleFromCurrentMonth(tx);
 					if (renderResult.isErr()) {
 						throw renderResult.error;
 					}
@@ -251,7 +308,7 @@ export class EventsService {
 					}
 
 					const renderResult =
-						await this.renderScheduleFromCurrentMonth();
+						await this.renderScheduleFromCurrentMonth(tx);
 					if (renderResult.isErr()) {
 						throw renderResult.error;
 					}

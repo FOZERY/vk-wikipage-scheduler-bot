@@ -1,5 +1,7 @@
 import './shared/dayjs.init.js';
 
+import { Config, OneTap } from '@vkid/sdk';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { getScheduleCronJob } from './external/cron/renderCron.js';
 import { logger } from './external/logger/pino.js';
 import { VKExtend } from './external/vk/bot/bot.js';
@@ -15,14 +17,22 @@ import { onFallbackMessage } from './external/vk/bot/shared/messages/onFallback.
 import { getContextPartForLogging } from './external/vk/bot/shared/utils/logger-messages.js';
 import { eventsService } from './modules/events/index.js';
 
+const renderJob = getScheduleCronJob(eventsService);
+
 const vk = new VKExtend({
 	token: process.env.LONGPOLL_TOKEN!,
 	preventOutbox: true,
 	preventChat: true,
 	hearEvents: ['message_new'],
+	errorHandler: async (error) => {
+		logger.fatal(error);
+		await gracefulShutdown(true);
+	},
 });
 
 vk.addScenes([addEventScene, deleteEventScene, updateEventScene]);
+
+vk.hear('/login', async (context) => {});
 
 vk.hear(
 	[{ 'messagePayload.command': 'addEvent' }, { text: '/add' }],
@@ -85,23 +95,43 @@ vk.hearOnFallback(async (context) => {
 	});
 });
 
-vk.updates.startPolling().then(() => {
-	logger.info('Polling started');
-	const renderJob = getScheduleCronJob(eventsService);
+async function start() {
 	renderJob.start();
 	logger.info('Cron renderJob started');
-});
+	await vk.updates.startPolling();
+	logger.info('Polling started');
+}
+
+async function gracefulShutdown(withError: boolean) {
+	logger.warn('Shutdowning app...');
+	await sleep(5000);
+	logger.warn('Stopping renderJob');
+	renderJob.stop();
+	logger.warn('Stopping bot polling...');
+	process.exit(withError ? 1 : 0);
+}
 
 process.on('uncaughtException', async (error) => {
 	logger.fatal(error);
-	logger.warn('Stopping polling...');
-	await vk.updates.stop();
-	process.exit(1);
+	await gracefulShutdown(true);
 });
 
 process.on('unhandledRejection', async (error) => {
 	logger.fatal(error);
-	logger.warn('Stopping polling...');
-	await vk.updates.stop();
-	process.exit(1);
+	await gracefulShutdown(true);
+});
+
+process.on('SIGINT', async () => {
+	logger.warn(`SIGINT`);
+	await gracefulShutdown(false);
+});
+
+process.on('SIGTERM', async () => {
+	logger.warn('SIGTERM');
+	await gracefulShutdown(false);
+});
+
+start().catch(async (error) => {
+	logger.error(error);
+	await gracefulShutdown(true);
 });

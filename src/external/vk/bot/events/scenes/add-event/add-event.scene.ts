@@ -28,7 +28,7 @@ export type AddEventSceneState = {
 };
 
 export type AddEventSceneDependencies = {
-	eventsController: EventsService;
+	eventsService: EventsService;
 	logger: Logger;
 };
 
@@ -41,7 +41,7 @@ export const addEventScene = createScene<
 	[dateStep, timeStep, organizerStep, titleStep, placeStep, confirmStep],
 	{
 		dependencies: {
-			eventsController: eventsService,
+			eventsService: eventsService,
 			logger: logger.child({
 				scene: 'add-event',
 			}),

@@ -24,7 +24,7 @@ export type UpdateEventSceneState = {
 };
 
 export type UpdateEventSceneDependencies = {
-	eventsController: EventsService;
+	eventsService: EventsService;
 	logger: Logger;
 };
 
@@ -55,7 +55,7 @@ export const updateEventScene = createScene<
 	],
 	{
 		dependencies: {
-			eventsController: eventsService,
+			eventsService: eventsService,
 			logger: logger.child({
 				scene: 'update-event',
 			}),

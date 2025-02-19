@@ -17,7 +17,7 @@ import {
 } from 'drizzle-orm';
 import { PgTransaction } from 'drizzle-orm/pg-core';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { err, ok, Result } from 'neverthrow';
+import { ok, Result } from 'neverthrow';
 import { DrizzleTransctionType } from '../../../../../external/db/drizzle/index.js';
 import { eventsTable } from '../../../../../external/db/drizzle/schema.js';
 import {
@@ -35,43 +35,41 @@ export class EventsRepositoryImpl implements EventsRepository {
 		tx?: unknown
 	): Promise<Result<EventEntity | null, unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
-			return err('tx is not instanceof PgTransaction');
+			throw new Error('tx is not instanceof PgTransaction');
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
-		try {
-			const event = await connection
-				.select()
-				.from(eventsTable)
-				.where(eq(eventsTable.id, id))
-				.limit(1);
+		const event = await connection
+			.select()
+			.from(eventsTable)
+			.where(eq(eventsTable.id, id))
+			.limit(1);
 
-			if (event.length === 0) {
-				return ok(null);
-			}
-
-			const eventResult = EventEntity.create({
-				id: event[0].id,
-				date: event[0].date,
-				startTime: event[0].start_time,
-				endTime: event[0].end_time,
-				organizer: event[0].organizer,
-				place: event[0].place,
-				title: event[0].title,
-				lastUpdaterId: event[0].last_updater_id,
-				createdAt: event[0].created_at || undefined,
-				updatedAt: event[0].updated_at || undefined,
-			});
-
-			if (eventResult.isErr()) {
-				return err(eventResult.error);
-			}
-
-			return ok(eventResult.value);
-		} catch (error) {
-			return err(error);
+		if (event.length === 0) {
+			return ok(null);
 		}
+
+		const eventResult = EventEntity.create({
+			id: event[0].id,
+			date: event[0].date,
+			startTime: event[0].start_time,
+			endTime: event[0].end_time,
+			organizer: event[0].organizer,
+			place: event[0].place,
+			title: event[0].title,
+			lastUpdaterId: event[0].last_updater_id,
+			createdAt: event[0].created_at || undefined,
+			updatedAt: event[0].updated_at || undefined,
+		});
+
+		if (eventResult.isErr()) {
+			throw new Error(eventResult.error.message, {
+				cause: eventResult.error,
+			});
+		}
+
+		return ok(eventResult.value);
 	}
 
 	public async delete(
@@ -79,18 +77,14 @@ export class EventsRepositoryImpl implements EventsRepository {
 		tx?: unknown
 	): Promise<Result<void, unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
-			return err('tx is not instanceof PgTransaction');
+			throw new Error('tx is not instanceof PgTransaction');
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
-		try {
-			await connection.delete(eventsTable).where(eq(eventsTable.id, id));
+		await connection.delete(eventsTable).where(eq(eventsTable.id, id));
 
-			return ok(undefined);
-		} catch (error) {
-			return err(error);
-		}
+		return ok(undefined);
 	}
 
 	async findEventsByTitleOrDate(
@@ -98,57 +92,55 @@ export class EventsRepositoryImpl implements EventsRepository {
 		tx?: unknown
 	): Promise<Result<EventEntity[], unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
-			return err('tx is not instanceof PgTransaction');
+			throw new Error('tx is not instanceof PgTransaction');
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
 		const ftsQuery = searchString.trim().replaceAll(' ', '+') + ':*';
 
-		try {
-			const events = await connection
-				.select()
-				.from(eventsTable)
-				.where(
-					or(
-						sql`fts @@ to_tsquery('russian', ${ftsQuery})`,
-						ilike(
-							sql<string>`to_char(${eventsTable.date}, 'YYYY-MM-DD')`,
-							`${dayjs(searchString, 'DD.MM.YYYY').format(
-								'YYYY-MM-DD'
-							)}%`
-						)
+		const events = await connection
+			.select()
+			.from(eventsTable)
+			.where(
+				or(
+					sql`fts @@ to_tsquery('russian', ${ftsQuery})`,
+					ilike(
+						sql<string>`to_char(${eventsTable.date}, 'YYYY-MM-DD')`,
+						`${dayjs(searchString, 'DD.MM.YYYY').format(
+							'YYYY-MM-DD'
+						)}%`
 					)
 				)
-				.limit(10)
-				.orderBy(asc(eventsTable.date), asc(eventsTable.start_time));
+			)
+			.limit(10)
+			.orderBy(asc(eventsTable.date), asc(eventsTable.start_time));
 
-			const mappedEvents: EventEntity[] = [];
-			for (const event of events) {
-				const eventResult = EventEntity.create({
-					id: event.id,
-					date: event.date,
-					startTime: event.start_time,
-					endTime: event.end_time,
-					organizer: event.organizer,
-					place: event.place,
-					title: event.title,
-					lastUpdaterId: event.last_updater_id,
-					createdAt: event.created_at || undefined,
-					updatedAt: event.updated_at || undefined,
+		const mappedEvents: EventEntity[] = [];
+		for (const event of events) {
+			const eventResult = EventEntity.create({
+				id: event.id,
+				date: event.date,
+				startTime: event.start_time,
+				endTime: event.end_time,
+				organizer: event.organizer,
+				place: event.place,
+				title: event.title,
+				lastUpdaterId: event.last_updater_id,
+				createdAt: event.created_at || undefined,
+				updatedAt: event.updated_at || undefined,
+			});
+
+			if (eventResult.isErr()) {
+				throw new Error(eventResult.error.message, {
+					cause: eventResult.error,
 				});
-
-				if (eventResult.isErr()) {
-					return err(eventResult.error);
-				}
-
-				mappedEvents.push(eventResult.value);
 			}
 
-			return ok(mappedEvents);
-		} catch (error) {
-			return err(error);
+			mappedEvents.push(eventResult.value);
 		}
+
+		return ok(mappedEvents);
 	}
 
 	async getEventsByDateRange(
@@ -156,56 +148,50 @@ export class EventsRepositoryImpl implements EventsRepository {
 		tx?: unknown
 	): Promise<Result<EventEntity[], unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
-			return err('tx is not instanceof PgTransaction');
+			throw new Error('tx is not instanceof PgTransaction');
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
-		try {
-			const events = await connection
-				.select()
-				.from(eventsTable)
-				.where(
-					month.endDate
-						? between(
-								eventsTable.date,
-								month.startDate,
-								month.endDate
-						  )
-						: gte(eventsTable.date, month.startDate)
-				)
-				.orderBy(
-					asc(eventsTable.date),
-					asc(eventsTable.start_time),
-					asc(eventsTable.end_time)
-				);
+		const events = await connection
+			.select()
+			.from(eventsTable)
+			.where(
+				month.endDate
+					? between(eventsTable.date, month.startDate, month.endDate)
+					: gte(eventsTable.date, month.startDate)
+			)
+			.orderBy(
+				asc(eventsTable.date),
+				asc(eventsTable.start_time),
+				asc(eventsTable.end_time)
+			);
 
-			const mappedEvents: EventEntity[] = [];
-			for (const event of events) {
-				const eventResult = EventEntity.create({
-					id: event.id,
-					date: event.date,
-					startTime: event.start_time,
-					endTime: event.end_time,
-					organizer: event.organizer,
-					place: event.place,
-					title: event.title,
-					lastUpdaterId: event.last_updater_id,
-					createdAt: event.created_at || undefined,
-					updatedAt: event.updated_at || undefined,
+		const mappedEvents: EventEntity[] = [];
+		for (const event of events) {
+			const eventResult = EventEntity.create({
+				id: event.id,
+				date: event.date,
+				startTime: event.start_time,
+				endTime: event.end_time,
+				organizer: event.organizer,
+				place: event.place,
+				title: event.title,
+				lastUpdaterId: event.last_updater_id,
+				createdAt: event.created_at || undefined,
+				updatedAt: event.updated_at || undefined,
+			});
+
+			if (eventResult.isErr()) {
+				throw new Error(eventResult.error.message, {
+					cause: eventResult.error,
 				});
-
-				if (eventResult.isErr()) {
-					return err(eventResult.error);
-				}
-
-				mappedEvents.push(eventResult.value);
 			}
 
-			return ok(mappedEvents);
-		} catch (error) {
-			return err(error);
+			mappedEvents.push(eventResult.value);
 		}
+
+		return ok(mappedEvents);
 	}
 
 	async findCollisionsByDateTimePlace(
@@ -213,7 +199,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 		tx?: unknown
 	): Promise<Result<EventEntity[], unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
-			return err('tx is not instanceof PgTransaction');
+			throw new Error('tx is not instanceof PgTransaction');
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
@@ -274,39 +260,37 @@ export class EventsRepositoryImpl implements EventsRepository {
 			);
 		}
 
-		try {
-			const collisions = await connection
-				.select()
-				.from(eventsTable)
-				.where(whereConditions)
-				.limit(1);
+		const collisions = await connection
+			.select()
+			.from(eventsTable)
+			.where(whereConditions)
+			.limit(1);
 
-			const mappedCollisions: EventEntity[] = [];
-			for (const event of collisions) {
-				const eventResult = EventEntity.create({
-					id: event.id,
-					date: event.date,
-					startTime: event.start_time,
-					endTime: event.end_time,
-					organizer: event.organizer,
-					place: event.place,
-					title: event.title,
-					lastUpdaterId: event.last_updater_id,
-					createdAt: event.created_at || undefined,
-					updatedAt: event.updated_at || undefined,
+		const mappedCollisions: EventEntity[] = [];
+		for (const event of collisions) {
+			const eventResult = EventEntity.create({
+				id: event.id,
+				date: event.date,
+				startTime: event.start_time,
+				endTime: event.end_time,
+				organizer: event.organizer,
+				place: event.place,
+				title: event.title,
+				lastUpdaterId: event.last_updater_id,
+				createdAt: event.created_at || undefined,
+				updatedAt: event.updated_at || undefined,
+			});
+
+			if (eventResult.isErr()) {
+				throw new Error(eventResult.error.message, {
+					cause: eventResult.error,
 				});
-
-				if (eventResult.isErr()) {
-					return err(eventResult.error);
-				}
-
-				mappedCollisions.push(eventResult.value);
 			}
 
-			return ok(mappedCollisions);
-		} catch (error) {
-			return err(error);
+			mappedCollisions.push(eventResult.value);
 		}
+
+		return ok(mappedCollisions);
 	}
 
 	async create(
@@ -314,59 +298,48 @@ export class EventsRepositoryImpl implements EventsRepository {
 		tx?: unknown
 	): Promise<Result<void, unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
-			return err('tx is not instanceof PgTransaction');
+			throw new Error('tx is not instanceof PgTransaction');
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
-		try {
-			await connection.insert(eventsTable).values({
-				date: event.date,
-				end_time: event.endTime,
-				organizer: event.organizer,
-				place: event.place,
-				last_updater_id: event.lastUpdaterId,
-				start_time: event.startTime,
-				title: event.title,
-			});
+		await connection.insert(eventsTable).values({
+			date: event.date,
+			end_time: event.endTime,
+			organizer: event.organizer,
+			place: event.place,
+			last_updater_id: event.lastUpdaterId,
+			start_time: event.startTime,
+			title: event.title,
+		});
 
-			return ok(undefined);
-		} catch (error) {
-			return err(error);
-		}
+		return ok(undefined);
 	}
 
 	async update(
-		event: EventEntity,
+		event: EventEntity & { id: number },
 		tx?: unknown
 	): Promise<Result<void, unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
-			return err('tx is not instanceof PgTransaction');
+			throw new Error('tx is not instanceof PgTransaction');
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
-		if (!event.id) {
-			return err('Event id is required');
-		}
+		await connection
+			.update(eventsTable)
+			.set({
+				date: event.date,
+				start_time: event.startTime,
+				end_time: event.endTime,
+				organizer: event.organizer,
+				place: event.place,
+				title: event.title,
+				last_updater_id: event.lastUpdaterId,
+				updated_at: new Date(),
+			})
+			.where(eq(eventsTable.id, event.id));
 
-		try {
-			await connection
-				.update(eventsTable)
-				.set({
-					date: event.date,
-					start_time: event.startTime,
-					end_time: event.endTime,
-					organizer: event.organizer,
-					place: event.place,
-					title: event.title,
-					last_updater_id: event.lastUpdaterId,
-					updated_at: new Date(),
-				})
-				.where(eq(eventsTable.id, event.id));
-			return ok(undefined);
-		} catch (error) {
-			return err(error);
-		}
+		return ok(undefined);
 	}
 }

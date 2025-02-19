@@ -73,7 +73,7 @@ export const findEventStep: SceneStepWithDependencies<
 	} else {
 		// если ввели текст
 		const result =
-			await context.dependencies.eventsController.findEventsByTitleOrDate(
+			await context.dependencies.eventsService.findEventsByTitleOrDate(
 				context.text
 			);
 

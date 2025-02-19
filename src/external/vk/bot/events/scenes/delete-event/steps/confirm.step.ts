@@ -72,7 +72,7 @@ export const confirmStep: SceneStepWithDependencies<
 		return await context.reply(`Воспользуйся клавиатурой.`);
 	}
 
-	const result = await context.dependencies.eventsController.deleteEventById(
+	const result = await context.dependencies.eventsService.deleteEventById(
 		context.scene.state.event.id!
 	);
 
