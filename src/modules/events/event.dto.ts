@@ -13,6 +13,7 @@ export interface CreateEventDTO {
 	startTime: string | null;
 	endTime: string | null;
 	organizer: string | null;
+	lastUpdaterId: string;
 }
 
 export interface GetEventsByDateRangeDTO {
@@ -28,4 +29,5 @@ export interface UpdateEventDTO {
 	startTime: string | null;
 	endTime: string | null;
 	organizer: string | null;
+	lastUpdaterId: string;
 }

@@ -59,6 +59,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 				organizer: event[0].organizer,
 				place: event[0].place,
 				title: event[0].title,
+				lastUpdaterId: event[0].last_updater_id,
 				createdAt: event[0].created_at || undefined,
 				updatedAt: event[0].updated_at || undefined,
 			});
@@ -132,6 +133,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					organizer: event.organizer,
 					place: event.place,
 					title: event.title,
+					lastUpdaterId: event.last_updater_id,
 					createdAt: event.created_at || undefined,
 					updatedAt: event.updated_at || undefined,
 				});
@@ -188,6 +190,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					organizer: event.organizer,
 					place: event.place,
 					title: event.title,
+					lastUpdaterId: event.last_updater_id,
 					createdAt: event.created_at || undefined,
 					updatedAt: event.updated_at || undefined,
 				});
@@ -288,6 +291,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					organizer: event.organizer,
 					place: event.place,
 					title: event.title,
+					lastUpdaterId: event.last_updater_id,
 					createdAt: event.created_at || undefined,
 					updatedAt: event.updated_at || undefined,
 				});
@@ -321,6 +325,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 				end_time: event.endTime,
 				organizer: event.organizer,
 				place: event.place,
+				last_updater_id: event.lastUpdaterId,
 				start_time: event.startTime,
 				title: event.title,
 			});
@@ -355,6 +360,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					organizer: event.organizer,
 					place: event.place,
 					title: event.title,
+					last_updater_id: event.lastUpdaterId,
 					updated_at: new Date(),
 				})
 				.where(eq(eventsTable.id, event.id));

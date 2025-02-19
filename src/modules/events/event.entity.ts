@@ -9,6 +9,7 @@ export interface EventEntityProps {
 	startTime: string | null;
 	endTime: string | null;
 	organizer: string | null;
+	lastUpdaterId: string;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -60,6 +61,13 @@ export class EventEntity {
 				)
 			);
 		}
+		if (props.lastUpdaterId.length > 255) {
+			return err(
+				Error(
+					'Validation error: lastUpdaterId must be less than 255 characters'
+				)
+			);
+		}
 		if (props.organizer && props.organizer.length > 255) {
 			return err(
 				Error(
@@ -101,6 +109,10 @@ export class EventEntity {
 
 	get organizer(): string | null {
 		return this.props.organizer;
+	}
+
+	get lastUpdaterId(): string {
+		return this.props.lastUpdaterId;
 	}
 
 	get createdAt(): Date | undefined {
@@ -210,6 +222,18 @@ export class EventEntity {
 			);
 		}
 		this.props.organizer = organizer;
+		return ok(undefined);
+	}
+
+	public setLastUpdaterId(id: string): Result<void, Error> {
+		if (id.length > 255) {
+			return err(
+				Error(
+					'Validation error: lastUpdaterId must be less than 255 characters'
+				)
+			);
+		}
+		this.props.lastUpdaterId = id;
 		return ok(undefined);
 	}
 }

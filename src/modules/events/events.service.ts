@@ -234,6 +234,7 @@ export class EventsService {
 						event.setDate(eventDTO.date),
 						event.setStartTime(eventDTO.startTime),
 						event.setEndTime(eventDTO.endTime),
+						event.setLastUpdaterId(eventDTO.lastUpdaterId),
 					]);
 
 					if (updatePropsResult.isErr()) {

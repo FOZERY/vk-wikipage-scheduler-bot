@@ -102,6 +102,7 @@ export const confirmStep: SceneStepWithDependencies<
 		endTime: context.scene.state.endTime,
 		organizer: context.scene.state.organizer,
 		title: context.scene.state.title,
+		lastUpdaterId: String(context.senderId),
 	});
 
 	if (result.isErr()) {

@@ -24,6 +24,7 @@ export type AddEventSceneState = {
 	place: string;
 	organizer: string | null;
 	title: string;
+	creatorId: string;
 };
 
 export type AddEventSceneDependencies = {
