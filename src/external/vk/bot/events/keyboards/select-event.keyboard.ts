@@ -1,18 +1,11 @@
 import dayjs from 'dayjs';
 import { Keyboard } from 'vk-io';
 import { EventEntity } from '../../../../../modules/events/event.entity.js';
+import { ViewEvent } from '../../shared/types/common.types.js';
 
 export type SelectEventKeyboardPayload = {
 	command: string;
-	event: {
-		id: number;
-		title: string;
-		date: string;
-		place: string;
-		startTime: string;
-		endTime: string;
-		organizer: string;
-	};
+	event: ViewEvent;
 };
 
 export const selectEventKeyboard = (events: EventEntity[]) => {
@@ -35,11 +28,11 @@ export const selectEventKeyboard = (events: EventEntity[]) => {
 					title: event.title,
 					date: event.date,
 					place: event.place,
-					startTime: event.startTime,
-					endTime: event.endTime,
+					timeRange: event.timeRange,
 					organizer: event.organizer,
+					lastUpdaterId: event.lastUpdaterId,
 				},
-			},
+			} as SelectEventKeyboardPayload,
 		});
 		keyboard.row();
 	});

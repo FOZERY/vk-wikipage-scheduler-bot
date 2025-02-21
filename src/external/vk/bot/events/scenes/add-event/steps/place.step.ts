@@ -53,7 +53,7 @@ export const organizerStep: SceneStepWithDependencies<
 				return await context.scene.leave();
 			}
 			case 'setPlace': {
-				context.scene.state.place = context.messagePayload.place;
+				context.scene.state.event.place = context.messagePayload.place;
 				break;
 			}
 			default: {
@@ -80,15 +80,14 @@ export const organizerStep: SceneStepWithDependencies<
 			return await context.reply('Слишком длинное название места.');
 		}
 
-		context.scene.state.place = parsedText;
+		context.scene.state.event.place = parsedText;
 	}
 
 	const result =
 		await context.dependencies.eventsService.findCollisionsInSchedule({
-			date: context.scene.state.date,
-			startTime: context.scene.state.startTime,
-			endTime: context.scene.state.endTime,
-			place: context.scene.state.place,
+			date: context.scene.state.event.date,
+			timeRange: context.scene.state.event.timeRange,
+			place: context.scene.state.event.place,
 		});
 
 	if (result.isErr()) {
@@ -111,7 +110,7 @@ export const organizerStep: SceneStepWithDependencies<
 			`
 Это место и время уже заняты событием "${result.value[0].title}"
 ${dayjs(result.value[0].date).tz().format('DD.MM.YYYY')}	
-${timeRangeToStringOutput(result.value[0].startTime, result.value[0].endTime)}`
+${timeRangeToStringOutput(result.value[0].timeRange)}`
 		);
 	}
 

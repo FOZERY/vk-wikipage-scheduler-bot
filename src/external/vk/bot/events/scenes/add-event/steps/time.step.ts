@@ -31,7 +31,6 @@ export const timeStep: SceneStepWithDependencies<
 	
 1. ЧЧ:ММ - ЧЧ:ММ 
 2. ЧЧ:ММ
-3. - (если времени нет) 
 			
 Либо выбери один из вариантов на клавиатуре.
 `,
@@ -57,9 +56,8 @@ export const timeStep: SceneStepWithDependencies<
 				return await context.scene.step.previous();
 			}
 			case 'setTime': {
-				context.scene.state.startTime =
-					context.messagePayload.startTime;
-				context.scene.state.endTime = context.messagePayload.endTime;
+				context.scene.state.event.timeRange =
+					context.messagePayload.timeRange;
 				break;
 			}
 			default: {
@@ -76,25 +74,22 @@ export const timeStep: SceneStepWithDependencies<
 	} else {
 		const trimmedText = context.text.trim();
 
-		if (trimmedText === '-') {
-			context.scene.state.startTime = null;
-			context.scene.state.endTime = null;
-		} else {
-			const result = parseTimeString(trimmedText);
+		const parseTimeResult = parseTimeString(trimmedText);
 
-			if (result.isErr()) {
-				logStep(
-					context,
-					`User ${context.senderId} -> entered invalid time`,
-					'warn',
-					result.error
-				);
-				return await context.reply('Неверный формат времени.');
-			}
-
-			context.scene.state.startTime = result.value.startTimeString;
-			context.scene.state.endTime = result.value.endTimeString;
+		if (parseTimeResult.isErr()) {
+			logStep(
+				context,
+				`User ${context.senderId} -> entered invalid time`,
+				'warn',
+				parseTimeResult.error
+			);
+			return await context.reply('Неверный формат времени.');
 		}
+
+		context.scene.state.event.timeRange = {
+			startTime: parseTimeResult.value.startTimeString,
+			endTime: parseTimeResult.value.endTimeString,
+		};
 	}
 
 	logStep(context, `User ${context.senderId} -> passed time step`, 'info');

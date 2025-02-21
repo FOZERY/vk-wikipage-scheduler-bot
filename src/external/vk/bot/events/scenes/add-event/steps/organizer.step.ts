@@ -1,5 +1,4 @@
 import { MessageContext } from 'vk-io';
-
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
 import {
 	attachTextButtonToKeyboard,
@@ -52,7 +51,7 @@ export const placeStep: SceneStepWithDependencies<
 				return await context.scene.leave();
 			}
 			case 'setNoOrganizer': {
-				context.scene.state.organizer = null;
+				context.scene.state.event.organizer = null;
 				break;
 			}
 			default: {
@@ -79,7 +78,7 @@ export const placeStep: SceneStepWithDependencies<
 			return await context.reply(`Слишком длинное имя организатора.`);
 		}
 
-		context.scene.state.organizer = parsedOrganizer;
+		context.scene.state.event.organizer = parsedOrganizer;
 	}
 
 	logStep(

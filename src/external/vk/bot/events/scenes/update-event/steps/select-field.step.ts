@@ -38,10 +38,7 @@ export const selectFieldStep: SceneStepWithDependencies<
 Дата: ${dayjs(context.scene.state.event.date, 'YYYY-MM-DD').format(
 				'DD.MM.YYYY'
 			)}	
-Время: ${timeRangeToStringOutput(
-				context.scene.state.event.startTime,
-				context.scene.state.event.endTime
-			)}
+Время: ${timeRangeToStringOutput(context.scene.state.event.timeRange)}
 Место: ${context.scene.state.event.place}
 Название: ${context.scene.state.event.title}
 Организатор: ${context.scene.state.event.organizer || 'не указан'}
@@ -108,11 +105,14 @@ export const selectFieldStep: SceneStepWithDependencies<
 				}
 			}
 			case SelectFieldKeyboardCommand.Confirm: {
-				const result = await context.dependencies.eventsService.update(
-					context.scene.state.event
-				);	
+				const result = await context.dependencies.eventsService.update({
+					id: context.scene.state.event.id!,
+					...context.scene.state.event,
+					lastUpdaterId: context.senderId,
+				});
 
 				if (result.isErr()) {
+					//TODO: обработка ошибок EXCLUDE
 					logStep(
 						context,
 						`User ${context.senderId} -> controller update error`,

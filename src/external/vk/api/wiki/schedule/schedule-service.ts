@@ -34,12 +34,9 @@ export class ScheduleService {
 		let newSchedule = events.reduce((acc, event) => {
 			return `${acc}|-\n| ${dayjs(event.date).format(
 				'DD.MM.YYYY'
-			)}\n| ${timeRangeToStringOutput(
-				event.startTime,
-				event.endTime
-			)}\n| ${event.title}\n| ${event.place}\n| ${
-				event.organizer ?? 'Не указано'
-			}\n`;
+			)}\n| ${timeRangeToStringOutput(event.timeRange)}\n| ${
+				event.title
+			}\n| ${event.place}\n| ${event.organizer ?? 'Не указано'}\n`;
 		}, '');
 		newSchedule = `{|\n${newSchedule}|}`;
 		return newSchedule;

@@ -73,7 +73,7 @@ export const titleStep: SceneStepWithDependencies<
 			return await context.reply(`Слишком длинное название для события`);
 		}
 
-		context.scene.state.title = parsedTitle;
+		context.scene.state.event.title = parsedTitle;
 	}
 
 	logStep(context, `User ${context.senderId} -> passed title step`, 'info');

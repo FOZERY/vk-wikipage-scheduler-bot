@@ -19,7 +19,11 @@ import { PgTransaction } from 'drizzle-orm/pg-core';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { ok, Result } from 'neverthrow';
 import { DrizzleTransctionType } from '../../../../../external/db/drizzle/index.js';
-import { eventsTable } from '../../../../../external/db/drizzle/schema.js';
+import {
+	eventsTable,
+	TimeRange,
+} from '../../../../../external/db/drizzle/schema.js';
+import { Nullable } from '../../../../../shared/types/common.types.js';
 import {
 	FindCollisionsByDateTimePlaceDTO,
 	GetEventsByDateRangeDTO,
@@ -50,11 +54,16 @@ export class EventsRepositoryImpl implements EventsRepository {
 			return ok(null);
 		}
 
+		const timeRange = event[0].time_range
+			? {
+					startTime: event[0].time_range.startTime.value,
+					endTime: event[0].time_range.endTime.value,
+			  }
+			: null;
 		const eventResult = EventEntity.create({
 			id: event[0].id,
 			date: event[0].date,
-			startTime: event[0].start_time,
-			endTime: event[0].end_time,
+			timeRange: timeRange,
 			organizer: event[0].organizer,
 			place: event[0].place,
 			title: event[0].title,
@@ -114,15 +123,20 @@ export class EventsRepositoryImpl implements EventsRepository {
 				)
 			)
 			.limit(10)
-			.orderBy(asc(eventsTable.date), asc(eventsTable.start_time));
+			.orderBy(asc(eventsTable.date), asc(sql`lower(time_range)`));
 
 		const mappedEvents: EventEntity[] = [];
 		for (const event of events) {
+			const timeRange = event.time_range
+				? {
+						startTime: event.time_range.startTime.value,
+						endTime: event.time_range.endTime.value,
+				  }
+				: null;
 			const eventResult = EventEntity.create({
 				id: event.id,
 				date: event.date,
-				startTime: event.start_time,
-				endTime: event.end_time,
+				timeRange: timeRange,
 				organizer: event.organizer,
 				place: event.place,
 				title: event.title,
@@ -153,49 +167,74 @@ export class EventsRepositoryImpl implements EventsRepository {
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
-		const events = await connection
-			.select()
-			.from(eventsTable)
-			.where(
-				month.endDate
-					? between(eventsTable.date, month.startDate, month.endDate)
-					: gte(eventsTable.date, month.startDate)
-			)
-			.orderBy(
-				asc(eventsTable.date),
-				asc(eventsTable.start_time),
-				asc(eventsTable.end_time)
-			);
+		try {
+			const events = await connection
+				.select()
+				.from(eventsTable)
+				.where(
+					month.endDate
+						? between(
+								eventsTable.date,
+								month.startDate,
+								month.endDate
+						  )
+						: gte(eventsTable.date, month.startDate)
+				)
+				.orderBy(
+					asc(eventsTable.date),
+					asc(sql`lower(time_range)`),
+					asc(sql`upper(time_range)`)
+				);
 
-		const mappedEvents: EventEntity[] = [];
-		for (const event of events) {
-			const eventResult = EventEntity.create({
-				id: event.id,
-				date: event.date,
-				startTime: event.start_time,
-				endTime: event.end_time,
-				organizer: event.organizer,
-				place: event.place,
-				title: event.title,
-				lastUpdaterId: event.last_updater_id,
-				createdAt: event.created_at || undefined,
-				updatedAt: event.updated_at || undefined,
-			});
-
-			if (eventResult.isErr()) {
-				throw new Error(eventResult.error.message, {
-					cause: eventResult.error,
+			const mappedEvents: EventEntity[] = [];
+			for (const event of events) {
+				const timeRange = event.time_range
+					? {
+							startTime: event.time_range.startTime.value,
+							endTime: event.time_range.endTime.value,
+					  }
+					: null;
+				const eventResult = EventEntity.create({
+					id: event.id,
+					date: event.date,
+					timeRange: timeRange,
+					organizer: event.organizer,
+					place: event.place,
+					title: event.title,
+					lastUpdaterId: event.last_updater_id,
+					createdAt: event.created_at || undefined,
+					updatedAt: event.updated_at || undefined,
 				});
+
+				if (eventResult.isErr()) {
+					throw new Error(eventResult.error.message, {
+						cause: eventResult.error,
+					});
+				}
+
+				mappedEvents.push(eventResult.value);
 			}
 
-			mappedEvents.push(eventResult.value);
+			return ok(mappedEvents);
+		} catch (error) {
+			if (error instanceof Error) {
+				console.error(error);
+				console.log(typeof error);
+			}
+			throw error;
 		}
-
-		return ok(mappedEvents);
 	}
 
 	async findCollisionsByDateTimePlace(
-		dto: FindCollisionsByDateTimePlaceDTO,
+		dto: {
+			date: string;
+			timeRange: Nullable<{
+				startTime: string;
+				endTime: string;
+			}>;
+			place: string;
+			excludeId?: number;
+		},
 		tx?: unknown
 	): Promise<Result<EventEntity[], unknown>> {
 		if (tx && !(tx instanceof PgTransaction)) {
@@ -204,61 +243,16 @@ export class EventsRepositoryImpl implements EventsRepository {
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
+		const timeRangeSql = dto.timeRange
+			? `(${dto.timeRange.startTime},${dto.timeRange.endTime})`
+			: undefined;
 		let whereConditions = and(
 			eq(eventsTable.date, dto.date),
 			ilike(eventsTable.place, `%${dto.place}%`),
-			isNotNull(eventsTable.start_time)
+			dto.timeRange
+				? sql`${eventsTable.time_range} && ${timeRangeSql}::timerange`
+				: undefined
 		);
-
-		if (dto.excludeId) {
-			whereConditions = and(
-				whereConditions,
-				ne(eventsTable.id, dto.excludeId)
-			);
-		}
-
-		/*
-		 * Вообще здесь можно сделать и через time range postgres type, но как будто бы слишком накладно??
-		 */
-		if (!dto.endTime) {
-			// Случай, когда endTime не указано в DTO (одномоментное событие)
-			whereConditions = and(
-				whereConditions,
-				or(
-					and(
-						isNotNull(eventsTable.end_time),
-						lte(eventsTable.start_time, dto.startTime!), // dto.startTime! - уверены, что startTime есть, т.к. проверяли isNotNull
-						gt(eventsTable.end_time, dto.startTime!) // dto.startTime! - уверены, что startTime есть, т.к. проверяли isNotNull
-					),
-					and(
-						isNull(eventsTable.end_time),
-						eq(eventsTable.start_time, dto.startTime!) // dto.startTime! - уверены, что startTime есть, т.к. проверяли isNotNull
-					)
-				)
-			);
-		} else {
-			// Случай, когда endTime указано в DTO (диапазон событий)
-			whereConditions = and(
-				whereConditions,
-				or(
-					and(
-						isNotNull(eventsTable.end_time),
-						or(
-							and(
-								gt(eventsTable.end_time, dto.startTime!), // dto.startTime! - уверены, что startTime есть
-								lt(eventsTable.start_time, dto.endTime)
-							),
-							eq(eventsTable.start_time, dto.startTime!) // dto.startTime! - уверены, что startTime есть
-						)
-					),
-					and(
-						isNull(eventsTable.end_time),
-						gte(eventsTable.start_time, dto.startTime!), // dto.startTime! - уверены, что startTime есть
-						lt(eventsTable.start_time, dto.endTime)
-					)
-				)
-			);
-		}
 
 		const collisions = await connection
 			.select()
@@ -268,11 +262,16 @@ export class EventsRepositoryImpl implements EventsRepository {
 
 		const mappedCollisions: EventEntity[] = [];
 		for (const event of collisions) {
+			const timeRange = event.time_range
+				? {
+						startTime: event.time_range.startTime.value,
+						endTime: event.time_range.endTime.value,
+				  }
+				: null;
 			const eventResult = EventEntity.create({
 				id: event.id,
 				date: event.date,
-				startTime: event.start_time,
-				endTime: event.end_time,
+				timeRange: timeRange,
 				organizer: event.organizer,
 				place: event.place,
 				title: event.title,
@@ -303,13 +302,22 @@ export class EventsRepositoryImpl implements EventsRepository {
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
+		const time_range: Nullable<TimeRange> = event.timeRange
+			? {
+					startTime: {
+						strict: false,
+						value: event.timeRange.startTime,
+					},
+					endTime: { strict: false, value: event.timeRange.endTime },
+			  }
+			: null;
+
 		await connection.insert(eventsTable).values({
 			date: event.date,
-			end_time: event.endTime,
 			organizer: event.organizer,
 			place: event.place,
 			last_updater_id: event.lastUpdaterId,
-			start_time: event.startTime,
+			time_range: time_range,
 			title: event.title,
 		});
 
@@ -326,12 +334,21 @@ export class EventsRepositoryImpl implements EventsRepository {
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
+		const time_range: Nullable<TimeRange> = event.timeRange
+			? {
+					startTime: {
+						strict: false,
+						value: event.timeRange.startTime,
+					},
+					endTime: { strict: false, value: event.timeRange.endTime },
+			  }
+			: null;
+
 		await connection
 			.update(eventsTable)
 			.set({
 				date: event.date,
-				start_time: event.startTime,
-				end_time: event.endTime,
+				time_range: time_range,
 				organizer: event.organizer,
 				place: event.place,
 				title: event.title,

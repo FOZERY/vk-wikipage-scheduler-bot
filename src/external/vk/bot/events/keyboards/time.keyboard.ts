@@ -13,8 +13,10 @@ const createTimeButtons = (startHour: number, endHour: number) => {
 				label: timeStringLabel,
 				payload: {
 					command: 'setTime',
-					startTime: timeStringPayload,
-					endTime: null,
+					timeRange: {
+						startTime: timeStringPayload,
+						endTime: null,
+					},
 				},
 			})
 		);
@@ -33,8 +35,7 @@ export const getTimeKeyboard = () =>
 			label: 'Без времени',
 			color: Keyboard.PRIMARY_COLOR,
 			payload: {
-				startTime: null,
-				endTime: null,
+				timeRange: null,
 				command: 'setTime',
 			},
 		}),

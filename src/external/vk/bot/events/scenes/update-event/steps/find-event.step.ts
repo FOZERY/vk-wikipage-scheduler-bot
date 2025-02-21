@@ -53,10 +53,7 @@ export const findEventStep: SceneStepWithDependencies<
 			case 'selectEvent': {
 				const { event } =
 					context.messagePayload as SelectEventKeyboardPayload;
-				context.scene.state.event = {
-					...event,
-					lastUpdaterId: String(context.senderId),
-				};
+				context.scene.state.event = event;
 				break;
 			}
 			default: {
