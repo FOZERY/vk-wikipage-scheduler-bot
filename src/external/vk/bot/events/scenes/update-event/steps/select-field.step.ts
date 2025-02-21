@@ -110,7 +110,7 @@ export const selectFieldStep: SceneStepWithDependencies<
 			case SelectFieldKeyboardCommand.Confirm: {
 				const result = await context.dependencies.eventsService.update(
 					context.scene.state.event
-				);
+				);	
 
 				if (result.isErr()) {
 					logStep(

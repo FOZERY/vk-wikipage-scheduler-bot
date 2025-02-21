@@ -13,6 +13,16 @@ import {
 import { EventEntity } from './event.entity.js';
 import { EventsRepository } from './events.repository.js';
 
+export class EventCollisionError extends Error {
+	public collisionEvent: EventEntity;
+
+	constructor(message: string, collisionEvent: EventEntity) {
+		super(message);
+		this.name = 'CollisionError';
+		this.collisionEvent = collisionEvent;
+	}
+}
+
 export class EventsService {
 	private logger: Logger;
 
@@ -192,15 +202,6 @@ export class EventsService {
 	}
 
 	public async create(event: CreateEventDTO) {
-		const entityResult = EventEntity.create(event);
-		if (entityResult.isErr()) {
-			this.logger.error(
-				entityResult.error,
-				'EventsService -> create: EventEntity create error'
-			);
-			return err(entityResult.error);
-		}
-
 		try {
 			await this.db.transaction(
 				async (tx) => {
@@ -220,7 +221,21 @@ export class EventsService {
 					}
 
 					if (checkCollisionResult.value.length > 0) {
-						throw new Error('Event collision detected');
+						throw new EventCollisionError(
+							'Event collision detected',
+							checkCollisionResult.value[0]
+						);
+					}
+
+					const entityResult = EventEntity.create(event);
+					if (entityResult.isErr()) {
+						this.logger.error(
+							entityResult.error,
+							'EventsService -> create: EventEntity create error'
+						);
+						throw new Error('EventEntity create error', {
+							cause: entityResult.error,
+						});
 					}
 
 					const createResult = await this.eventsRepository.create(

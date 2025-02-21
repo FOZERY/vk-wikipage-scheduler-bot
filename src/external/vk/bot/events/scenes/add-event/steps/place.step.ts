@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { MessageContext } from 'vk-io';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
 import {
@@ -7,6 +8,7 @@ import {
 } from '../../../../shared/utils/keyboard-utils.js';
 import { logStep } from '../../../../shared/utils/logger-messages.js';
 import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
+import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
 import { getPlaceKeyboard } from '../../../keyboards/place.keyboard.js';
 import {
 	AddEventSceneDependencies,
@@ -106,7 +108,10 @@ export const organizerStep: SceneStepWithDependencies<
 			'info'
 		);
 		return await context.reply(
-			`Это место и время уже заняты другим событием: "${result.value[0].title}".`
+			`
+Это место и время уже заняты событием "${result.value[0].title}"
+${dayjs(result.value[0].date).tz().format('DD.MM.YYYY')}	
+${timeRangeToStringOutput(result.value[0].startTime, result.value[0].endTime)}`
 		);
 	}
 

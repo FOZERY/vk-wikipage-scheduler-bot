@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { Keyboard, MessageContext } from 'vk-io';
+import { EventCollisionError } from '../../../../../../../modules/events/events.service.js';
 import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
 import {
 	attachTextButtonToKeyboard,
@@ -106,13 +107,31 @@ export const confirmStep: SceneStepWithDependencies<
 	});
 
 	if (result.isErr()) {
+		if (result.error instanceof EventCollisionError) {
+			logStep(
+				context,
+				`User ${context.senderId} -> place is already taken`,
+				'info'
+			);
+			return await context.reply(
+				`
+Это место и время уже заняты событием "${result.error.collisionEvent.title}"
+${dayjs(result.error.collisionEvent.date).tz().format('DD.MM.YYYY')}	
+${timeRangeToStringOutput(
+	result.error.collisionEvent.startTime,
+	result.error.collisionEvent.endTime
+)}`
+			);
+		}
+
 		logStep(
 			context,
 			`User ${context.senderId} -> error while creating event`,
 			'error',
 			result.error
 		);
-		await context.send('Ошибка сервиса.');
+
+		return await context.send('Ошибка сервиса.');
 	}
 
 	logStep(context, `User ${context.senderId} -> passed confirm step`, 'info');
