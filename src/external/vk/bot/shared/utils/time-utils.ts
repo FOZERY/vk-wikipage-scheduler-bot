@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { err, ok } from 'neverthrow';
 import { invalidFormatErr } from '../errors/index.js';
+import { ViewTimeRange } from '../types/common.types.js';
 
 export function parseTimeString(input: string) {
 	const timeRangeRegex = /(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/;
@@ -43,20 +44,17 @@ export function parseTimeString(input: string) {
 	return ok({ startTimeString, endTimeString });
 }
 
-export function timeRangeToStringOutput(
-	startTime: string | null,
-	endTime: string | null
-): string {
-	if (!startTime) {
+export function timeRangeToStringOutput(timeRange: ViewTimeRange): string {
+	if (!timeRange) {
 		return 'Не указано';
 	}
 
-	if (!endTime) {
-		return dayjs(startTime, 'HH:mm:ss').format('HH:mm');
+	if (!timeRange.endTime) {
+		return `${dayjs(timeRange.startTime, 'HH:mm:ss').format('HH:mm')}`;
 	}
 
-	return `${dayjs(startTime, 'HH:mm:ss').format('HH:mm')} - ${dayjs(
-		endTime,
+	return `${dayjs(timeRange.startTime, 'HH:mm:ss').format('HH:mm')} - ${dayjs(
+		timeRange.endTime,
 		'HH:mm:ss'
 	).format('HH:mm')}`;
 }

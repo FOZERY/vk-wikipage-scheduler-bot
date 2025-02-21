@@ -29,21 +29,18 @@ export const confirmStep: SceneStepWithDependencies<
 			'info'
 		);
 
-		const dateFormattedString = dayjs(context.scene.state.date)
+		const dateFormattedString = dayjs(context.scene.state.event.date)
 			.tz()
 			.format('DD.MM.YYYY');
 
 		return await context.send(
 			`	
 Событие, которое вы хотите создать: 	
-Дата: ${dateFormattedString}	
-Время: ${timeRangeToStringOutput(
-				context.scene.state.startTime,
-				context.scene.state.endTime
-			)}			
-Место: ${context.scene.state.place}	
-Название: ${context.scene.state.title}
-Организатор: ${context.scene.state.organizer || 'Не указан'}
+Дата: ${dateFormattedString}		
+Время: ${timeRangeToStringOutput(context.scene.state.event.timeRange)}			
+Место: ${context.scene.state.event.place}	
+Название: ${context.scene.state.event.title}
+Организатор: ${context.scene.state.event.organizer || 'Не указан'}
 `,
 			{
 				keyboard: attachTextButtonToKeyboard(getConfirmKeyboard(), [
@@ -97,13 +94,12 @@ export const confirmStep: SceneStepWithDependencies<
 	}
 
 	const result = await context.dependencies.eventsService.create({
-		date: context.scene.state.date,
-		place: context.scene.state.place,
-		startTime: context.scene.state.startTime,
-		endTime: context.scene.state.endTime,
-		organizer: context.scene.state.organizer,
-		title: context.scene.state.title,
-		lastUpdaterId: String(context.senderId),
+		date: context.scene.state.event.date,
+		place: context.scene.state.event.place,
+		timeRange: context.scene.state.event.timeRange,
+		organizer: context.scene.state.event.organizer,
+		title: context.scene.state.event.title,
+		lastUpdaterId: context.senderId,
 	});
 
 	if (result.isErr()) {
@@ -114,13 +110,10 @@ export const confirmStep: SceneStepWithDependencies<
 				'info'
 			);
 			return await context.reply(
-				`
+				`	
 Это место и время уже заняты событием "${result.error.collisionEvent.title}"
 ${dayjs(result.error.collisionEvent.date).tz().format('DD.MM.YYYY')}	
-${timeRangeToStringOutput(
-	result.error.collisionEvent.startTime,
-	result.error.collisionEvent.endTime
-)}`
+${timeRangeToStringOutput(result.error.collisionEvent.timeRange)}`
 			);
 		}
 

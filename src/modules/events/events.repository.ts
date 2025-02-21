@@ -1,8 +1,6 @@
 import { Result } from 'neverthrow';
-import {
-	FindCollisionsByDateTimePlaceDTO,
-	GetEventsByDateRangeDTO,
-} from './event.dto.js';
+import { Nullable } from '../../shared/types/common.types.js';
+import { GetEventsByDateRangeDTO } from './event.dto.js';
 import { EventEntity } from './event.entity.js';
 
 export interface EventsRepository {
@@ -22,7 +20,15 @@ export interface EventsRepository {
 	): Promise<Result<EventEntity[], unknown>>;
 
 	findCollisionsByDateTimePlace(
-		dto: FindCollisionsByDateTimePlaceDTO,
+		dto: {
+			date: string;
+			timeRange: Nullable<{
+				startTime: string;
+				endTime: string;
+			}>;
+			place: string;
+			excludeId?: number;
+		},
 		tx?: unknown
 	): Promise<Result<EventEntity[], unknown>>;
 

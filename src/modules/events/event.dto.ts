@@ -1,7 +1,8 @@
+import { Nullable } from '../../shared/types/common.types.js';
+
 export interface FindCollisionsByDateTimePlaceDTO {
 	date: string;
-	startTime: string | null;
-	endTime: string | null;
+	timeRange: Nullable<{ startTime: string; endTime: string | null }>;
 	place: string;
 	excludeId?: number;
 }
@@ -10,10 +11,12 @@ export interface CreateEventDTO {
 	date: string;
 	place: string;
 	title: string;
-	startTime: string | null;
-	endTime: string | null;
+	timeRange: Nullable<{
+		startTime: string;
+		endTime: Nullable<string>;
+	}>;
 	organizer: string | null;
-	lastUpdaterId: string;
+	lastUpdaterId: number;
 }
 
 export interface GetEventsByDateRangeDTO {
@@ -26,8 +29,10 @@ export interface UpdateEventDTO {
 	date: string;
 	place: string;
 	title: string;
-	startTime: string | null;
-	endTime: string | null;
+	timeRange: Nullable<{
+		startTime: string;
+		endTime: Nullable<string>;
+	}>;
 	organizer: string | null;
-	lastUpdaterId: string;
+	lastUpdaterId: number;
 }

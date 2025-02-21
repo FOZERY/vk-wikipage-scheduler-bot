@@ -32,7 +32,6 @@ export const updateTimeStep: SceneStepWithDependencies<
 		
 1. ЧЧ:ММ - ЧЧ:ММ 
 2. ЧЧ:ММ
-3. - (если времени нет) 
 				
 Либо выбери один из вариантов на клавиатуре.`,
 			{
@@ -56,8 +55,7 @@ export const updateTimeStep: SceneStepWithDependencies<
 				);
 			}
 			case 'setTime': {
-				context.scene.state.event.startTime = payload.startTime;
-				context.scene.state.event.endTime = payload.endTime;
+				context.scene.state.event.timeRange = payload.timeRange;
 				break;
 			}
 			default: {
@@ -74,25 +72,22 @@ export const updateTimeStep: SceneStepWithDependencies<
 	} else {
 		const trimmedText = context.text.trim();
 
-		if (trimmedText === '-') {
-			context.scene.state.event.startTime = null;
-			context.scene.state.event.endTime = null;
-		} else {
-			const result = parseTimeString(trimmedText);
+		const result = parseTimeString(trimmedText);
 
-			if (result.isErr()) {
-				logStep(
-					context,
-					`User ${context.senderId} -> entered invalid time`,
-					'warn',
-					result.error
-				);
-				return await context.reply('Неверный формат времени.');
-			}
-
-			context.scene.state.event.startTime = result.value.startTimeString;
-			context.scene.state.event.endTime = result.value.endTimeString;
+		if (result.isErr()) {
+			logStep(
+				context,
+				`User ${context.senderId} -> entered invalid time`,
+				'warn',
+				result.error
+			);
+			return await context.reply('Неверный формат времени.');
 		}
+
+		context.scene.state.event.timeRange = {
+			startTime: result.value.startTimeString,
+			endTime: result.value.endTimeString,
+		};
 	}
 
 	logStep(

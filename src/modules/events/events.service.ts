@@ -148,12 +148,12 @@ export class EventsService {
 
 		// Validate startTime if provided
 		if (
-			dto.startTime &&
-			!dayjs(dto.startTime, 'HH:mm:ss', true).isValid()
+			dto.timeRange &&
+			!dayjs(dto.timeRange.startTime, 'HH:mm:ss', true).isValid()
 		) {
 			this.logger.warn(
 				{ dto },
-				`EventsService -> findCollisionsInSchedule Validation error: startTime ${dto.startTime} must be in the format HH:mm:ss`
+				`EventsService -> findCollisionsInSchedule Validation error: startTime ${dto.timeRange.startTime} must be in the format HH:mm:ss`
 			);
 			return err(
 				new Error(
@@ -163,10 +163,14 @@ export class EventsService {
 		}
 
 		// Validate endTime if provided
-		if (dto.endTime && !dayjs(dto.endTime, 'HH:mm:ss', true).isValid()) {
+		if (
+			dto.timeRange &&
+			dto.timeRange.endTime &&
+			!dayjs(dto.timeRange.endTime, 'HH:mm:ss', true).isValid()
+		) {
 			this.logger.warn(
 				{ dto },
-				`EventsService -> findCollisionsInSchedule Validation error: endTime ${dto.endTime} must be in the format HH:mm:ss`
+				`EventsService -> findCollisionsInSchedule Validation error: endTime ${dto.timeRange.endTime} must be in the format HH:mm:ss`
 			);
 			return err(
 				new Error(
@@ -177,20 +181,27 @@ export class EventsService {
 
 		// If both startTime and endTime are provided, ensure startTime is before endTime
 		if (
-			dto.startTime &&
-			dto.endTime &&
-			dayjs(dto.startTime).isAfter(dayjs(dto.endTime))
+			dto.timeRange &&
+			dto.timeRange.endTime &&
+			dayjs(dto.timeRange.startTime).isAfter(dayjs(dto.timeRange.endTime))
 		) {
 			this.logger.warn(
 				{ dto },
-				`EventsService -> findCollisionsInSchedule Validation error: startTime ${dto.startTime} must be before ${dto.endTime}`
+				`EventsService -> findCollisionsInSchedule Validation error: startTime ${dto.timeRange.startTime} must be before ${dto.timeRange.endTime}`
 			);
 			return err(
 				new Error('Validation error: startTime must be before endTime')
 			);
 		}
 
+		if (dto.timeRange && dto.timeRange.endTime === null) {
+			dto.timeRange.endTime = dayjs(dto.timeRange.startTime, 'HH:mm:ss')
+				.add(15, 'minute')
+				.format('HH:mm:ss');
+		}
+
 		const result =
+			// @ts-ignore
 			await this.eventsRepository.findCollisionsByDateTimePlace(dto);
 
 		if (result.isErr()) {
@@ -201,33 +212,19 @@ export class EventsService {
 		return ok(result.value);
 	}
 
-	public async create(event: CreateEventDTO) {
+	public async create(dto: CreateEventDTO) {
 		try {
 			await this.db.transaction(
 				async (tx) => {
-					const checkCollisionResult =
-						await this.eventsRepository.findCollisionsByDateTimePlace(
-							{
-								date: event.date,
-								place: event.place,
-								endTime: event.endTime,
-								startTime: event.startTime,
-							},
-							tx
-						);
+					const entityResult = EventEntity.create({
+						date: dto.date,
+						place: dto.place,
+						title: dto.title,
+						organizer: dto.organizer,
+						timeRange: dto.timeRange,
+						lastUpdaterId: dto.lastUpdaterId,
+					});
 
-					if (checkCollisionResult.isErr()) {
-						throw checkCollisionResult.error;
-					}
-
-					if (checkCollisionResult.value.length > 0) {
-						throw new EventCollisionError(
-							'Event collision detected',
-							checkCollisionResult.value[0]
-						);
-					}
-
-					const entityResult = EventEntity.create(event);
 					if (entityResult.isErr()) {
 						this.logger.error(
 							entityResult.error,
@@ -255,7 +252,7 @@ export class EventsService {
 
 					return;
 				},
-				{ isolationLevel: 'serializable' }
+				{ isolationLevel: 'read committed' }
 			);
 
 			return ok(undefined);
@@ -264,8 +261,8 @@ export class EventsService {
 		}
 	}
 
-	public async update(eventDTO: UpdateEventDTO) {
-		const entityResult = await this.eventsRepository.getById(eventDTO.id);
+	public async update(dto: UpdateEventDTO) {
+		const entityResult = await this.eventsRepository.getById(dto.id);
 		if (entityResult.isErr()) {
 			return err(entityResult.error);
 		}
@@ -279,34 +276,13 @@ export class EventsService {
 		try {
 			await this.db.transaction(
 				async (tx) => {
-					const checkCollisionResult =
-						await this.eventsRepository.findCollisionsByDateTimePlace(
-							{
-								date: eventDTO.date,
-								place: eventDTO.place,
-								endTime: eventDTO.endTime,
-								startTime: eventDTO.startTime,
-								excludeId: event.id,
-							},
-							tx
-						);
-
-					if (checkCollisionResult.isErr()) {
-						throw checkCollisionResult.error;
-					}
-
-					if (checkCollisionResult.value.length > 0) {
-						throw new Error('Event collision detected');
-					}
-
 					const updatePropsResult = Result.combine([
-						event.setOrganizer(eventDTO.organizer),
-						event.setPlace(eventDTO.place),
-						event.setTitle(eventDTO.title),
-						event.setDate(eventDTO.date),
-						event.setStartTime(eventDTO.startTime),
-						event.setEndTime(eventDTO.endTime),
-						event.setLastUpdaterId(eventDTO.lastUpdaterId),
+						event.setOrganizer(dto.organizer),
+						event.setPlace(dto.place),
+						event.setTitle(dto.title),
+						event.setDate(dto.date),
+						event.setTimeRange(dto.timeRange),
+						event.setLastUpdaterId(dto.lastUpdaterId),
 					]);
 
 					if (updatePropsResult.isErr()) {
@@ -330,7 +306,7 @@ export class EventsService {
 
 					return;
 				},
-				{ isolationLevel: 'serializable' }
+				{ isolationLevel: 'read committed' }
 			);
 
 			return ok(undefined);

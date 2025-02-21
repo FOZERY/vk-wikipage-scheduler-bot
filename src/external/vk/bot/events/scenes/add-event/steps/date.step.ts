@@ -18,6 +18,8 @@ export const dateStep: SceneStepWithDependencies<
 	AddEventSceneState,
 	AddEventSceneDependencies
 > = async (context) => {
+	// @ts-ignore
+	context.scene.state.event = {};
 	if (context.scene.step.firstTime) {
 		logStep(
 			context,
@@ -48,7 +50,7 @@ export const dateStep: SceneStepWithDependencies<
 				return await context.scene.leave();
 			}
 			case 'setDate': {
-				context.scene.state.date = context.messagePayload.date;
+				context.scene.state.event.date = context.messagePayload.date;
 				break;
 			}
 			default: {
@@ -77,7 +79,7 @@ export const dateStep: SceneStepWithDependencies<
 			return await context.reply('Неправильный формат даты.');
 		}
 
-		context.scene.state.date = result.value;
+		context.scene.state.event.date = result.value;
 	}
 
 	logStep(context, `User ${context.senderId} -> passed date step`, 'info');

@@ -31,10 +31,7 @@ export const confirmStep: SceneStepWithDependencies<
 Дата: ${dayjs(context.scene.state.event.date, 'YYYY-MM-DD').format(
 				'DD.MM.YYYY'
 			)}	
-Время: ${timeRangeToStringOutput(
-				context.scene.state.event.startTime,
-				context.scene.state.event.endTime
-			)}
+Время: ${timeRangeToStringOutput(context.scene.state.event.timeRange)}
 Место: ${context.scene.state.event.place}
 Название: ${context.scene.state.event.title}
 Организатор: ${context.scene.state.event.organizer || 'не указан'}
@@ -65,6 +62,17 @@ export const confirmStep: SceneStepWithDependencies<
 			}
 			case 'previous': {
 				return await context.scene.step.previous();
+			}
+			case 'deleteEvent': {
+				break;
+			}
+			default: {
+				logStep(
+					context,
+					`User ${context.senderId} -> unknown command`,
+					'error'
+				);
+				throw new Error('Unknown command');
 			}
 		}
 	} else {

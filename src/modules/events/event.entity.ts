@@ -1,64 +1,107 @@
 import dayjs from 'dayjs';
-import { create } from 'domain';
 import { err, ok, Result } from 'neverthrow';
 import { createValidationError, ValidationError } from '../../shared/errors.js';
+import { Nullable } from '../../shared/types/common.types.js';
 
 export interface EventEntityProps {
 	id?: number;
 	title: string;
 	date: string;
 	place: string;
-	startTime: string | null;
-	endTime: string | null;
-	organizer: string | null;
-	lastUpdaterId: string;
+	timeRange: Nullable<{
+		startTime: string;
+		endTime: Nullable<string>;
+	}>;
+	organizer: Nullable<string>;
+	lastUpdaterId: number;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
 
+export type EventEntityTimeRange = Nullable<{
+	startTime: string;
+	endTime: string;
+}>;
+
 export class EventEntity {
-	private constructor(private props: EventEntityProps) {}
+	private _id?: number;
+	private _title: string;
+	private _date: string;
+	private _place: string;
+	private _timeRange: EventEntityTimeRange;
+	private _organizer: Nullable<string>;
+	private _lastUpdaterId: number;
+	private _createdAt?: Date;
+	private _updatedAt?: Date;
+
+	private constructor(props: EventEntityProps) {
+		this._id = props.id;
+		this._title = props.title;
+		this._date = props.date;
+		this._place = props.place;
+		this._timeRange = props.timeRange
+			? {
+					startTime: props.timeRange.startTime,
+					endTime: props.timeRange.endTime
+						? props.timeRange.endTime
+						: dayjs(props.timeRange.startTime, 'HH:mm:ss')
+								.add(15, 'minute')
+								.format('HH:mm:ss'),
+			  }
+			: null;
+		this._organizer = props.organizer;
+		this._lastUpdaterId = props.lastUpdaterId;
+		this._createdAt = props.createdAt;
+		this._updatedAt = props.updatedAt;
+	}
 
 	public static create(
 		props: EventEntityProps
 	): Result<EventEntity, ValidationError> {
 		if (
-			props.startTime &&
-			!dayjs(props.startTime, 'HH:mm:ss', true).isValid()
+			props.timeRange &&
+			!dayjs(props.timeRange.startTime, 'HH:mm:ss', true).isValid()
 		) {
 			return err(
 				createValidationError(
 					'startTime must be in the format HH:mm:ss',
-					props.startTime,
+					props.timeRange.startTime,
 					'HH:mm:ss'
 				)
 			);
 		}
 		if (
-			props.endTime &&
-			!dayjs(props.endTime, 'HH:mm:ss', true).isValid()
+			props.timeRange &&
+			props.timeRange.endTime &&
+			!dayjs(props.timeRange.endTime, 'HH:mm:ss', true).isValid()
 		) {
 			return err(
 				createValidationError(
 					'endTime must be in the format HH:mm:ss',
-					props.endTime,
+					props.timeRange.endTime,
 					'HH:mm:ss'
 				)
 			);
 		}
 		if (
-			props.startTime &&
-			props.endTime &&
-			dayjs(props.startTime).isAfter(dayjs(props.endTime))
+			props.timeRange &&
+			props.timeRange.endTime &&
+			dayjs(props.timeRange.startTime).isAfter(
+				dayjs(props.timeRange.endTime)
+			)
 		) {
 			return err(
 				createValidationError(
 					'startTime must be before endTime',
-					{ startTime: props.startTime, endTime: props.endTime },
+					{
+						startTime: props.timeRange.startTime,
+						endTime: props.timeRange.endTime,
+					},
 					'startTime < endTime'
 				)
 			);
 		}
+
 		if (props.title.length > 255) {
 			return err(
 				createValidationError(
@@ -77,12 +120,12 @@ export class EventEntity {
 				)
 			);
 		}
-		if (props.lastUpdaterId.length > 255) {
+		if (props.lastUpdaterId <= 0) {
 			return err(
 				createValidationError(
-					'lastUpdaterId must be less than 255 characters',
+					'lastUpdaterId must be greater than 0',
 					props.lastUpdaterId,
-					'< 255'
+					'> 0'
 				)
 			);
 		}
@@ -109,43 +152,39 @@ export class EventEntity {
 	}
 
 	get id(): number | undefined {
-		return this.props.id;
+		return this._id;
 	}
 
 	get title(): string {
-		return this.props.title;
+		return this._title;
 	}
 
 	get date(): string {
-		return this.props.date;
+		return this._date;
 	}
 
 	get place(): string {
-		return this.props.place;
+		return this._place;
 	}
 
-	get startTime(): string | null {
-		return this.props.startTime;
-	}
-
-	get endTime(): string | null {
-		return this.props.endTime;
+	get timeRange() {
+		return this._timeRange;
 	}
 
 	get organizer(): string | null {
-		return this.props.organizer;
+		return this._organizer;
 	}
 
-	get lastUpdaterId(): string {
-		return this.props.lastUpdaterId;
+	get lastUpdaterId(): number {
+		return this._lastUpdaterId;
 	}
 
 	get createdAt(): Date | undefined {
-		return this.props.createdAt;
+		return this._createdAt;
 	}
 
 	get updatedAt(): Date | undefined {
-		return this.props.updatedAt;
+		return this._updatedAt;
 	}
 
 	public toJSON() {
@@ -154,8 +193,7 @@ export class EventEntity {
 			title: this.title,
 			date: this.date,
 			place: this.place,
-			startTime: this.startTime,
-			endTime: this.endTime,
+			timeRange: this.timeRange,
 			organizer: this.organizer,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
@@ -172,7 +210,7 @@ export class EventEntity {
 				)
 			);
 		}
-		this.props.title = title;
+		this._title = title;
 		return ok(undefined);
 	}
 
@@ -186,7 +224,7 @@ export class EventEntity {
 				)
 			);
 		}
-		this.props.date = date;
+		this._date = date;
 		return ok(undefined);
 	}
 
@@ -200,71 +238,66 @@ export class EventEntity {
 				)
 			);
 		}
-		this.props.place = place;
+		this._place = place;
 		return ok(undefined);
 	}
 
-	public setStartTime(
-		startTime: string | null
+	public setTimeRange(
+		timeRange: Nullable<{
+			startTime: string;
+			endTime: Nullable<string>;
+		}>
 	): Result<void, ValidationError> {
-		if (startTime && !dayjs(startTime, 'HH:mm:ss', true).isValid()) {
+		if (timeRange === null) {
+			this._timeRange = null;
+			return ok(undefined);
+		}
+
+		if (!dayjs(timeRange.startTime, 'HH:mm:ss', true).isValid()) {
 			return err(
 				createValidationError(
 					'startTime must be in the format HH:mm:ss',
-					startTime,
+					timeRange.startTime,
 					'HH:mm:ss'
 				)
 			);
 		}
+
 		if (
-			startTime &&
-			this.props.endTime &&
-			dayjs(startTime).isAfter(dayjs(this.props.endTime))
+			timeRange.endTime &&
+			!dayjs(timeRange.endTime, 'HH:mm:ss', true).isValid()
 		) {
-			return err(
-				createValidationError(
-					'startTime must be before endTime',
-					{
-						startTime: startTime,
-						endTime: this.props.endTime,
-					},
-					'startTime < endTime'
-				)
-			);
-		}
-		this.props.startTime = startTime;
-
-		return ok(undefined);
-	}
-
-	public setEndTime(endTime: string | null): Result<void, ValidationError> {
-		if (endTime && !dayjs(endTime, 'HH:mm:ss', true).isValid()) {
 			return err(
 				createValidationError(
 					'endTime must be in the format HH:mm:ss',
-					endTime,
+					timeRange.endTime,
 					'HH:mm:ss'
 				)
 			);
 		}
 
 		if (
-			endTime &&
-			this.props.startTime &&
-			dayjs(this.props.startTime).isAfter(dayjs(endTime))
+			timeRange.endTime &&
+			dayjs(timeRange.startTime).isAfter(dayjs(timeRange.endTime))
 		) {
 			return err(
 				createValidationError(
 					'startTime must be before endTime',
 					{
-						startTime: this.props.startTime,
-						endTime,
+						startTime: timeRange.startTime,
+						endTime: timeRange.endTime,
 					},
 					'startTime < endTime'
 				)
 			);
 		}
-		this.props.endTime = endTime;
+
+		if (!timeRange.endTime) {
+			timeRange.endTime = dayjs(timeRange.startTime, 'HH:mm:ss')
+				.add(15, 'minutes')
+				.format('HH:mm:ss');
+		}
+
 		return ok(undefined);
 	}
 
@@ -280,21 +313,21 @@ export class EventEntity {
 				)
 			);
 		}
-		this.props.organizer = organizer;
+		this._organizer = organizer;
 		return ok(undefined);
 	}
 
-	public setLastUpdaterId(id: string): Result<void, ValidationError> {
-		if (id.length > 255) {
+	public setLastUpdaterId(id: number): Result<void, ValidationError> {
+		if (id <= 0) {
 			return err(
 				createValidationError(
-					'lastUpdaterId must be less than 255 characters',
+					'lastUpdaterId must be greater than 0',
 					id,
-					'< 255'
+					'> 0'
 				)
 			);
 		}
-		this.props.lastUpdaterId = id;
+		this._lastUpdaterId = id;
 		return ok(undefined);
 	}
 }
