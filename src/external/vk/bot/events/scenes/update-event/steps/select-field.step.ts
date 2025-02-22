@@ -1,24 +1,28 @@
-import dayjs from 'dayjs';
-import { MessageContext } from 'vk-io';
+import dayjs from "dayjs";
+import { MessageContext } from "vk-io";
+import {
+	DatabaseConstraintError,
+	ValidationError,
+} from "../../../../../../../shared/errors.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { timeRangeToStringOutput } from "../../../../shared/utils/time-utils.js";
 import {
 	getSelectFieldOrConfirmKeyboard,
 	SelectField,
 	SelectFieldKeyboardCommand,
 	SelectFieldKeyboardPayload,
-} from '../../../keyboards/select-field.keyboard.js';
+} from "../../../keyboards/select-field.keyboard.js";
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
 	UpdateEventSceneStepNumber,
-} from '../update-event.scene.js';
+} from "../update-event.scene.js";
 
 export const selectFieldStep: SceneStepWithDependencies<
 	MessageContext,
@@ -29,19 +33,19 @@ export const selectFieldStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered select-field step`,
-			'info'
+			"info"
 		);
 
 		return await context.send(
 			`
 Вы выбрали следующее событие:
-Дата: ${dayjs(context.scene.state.event.date, 'YYYY-MM-DD').format(
-				'DD.MM.YYYY'
+Дата: ${dayjs(context.scene.state.event.date, "YYYY-MM-DD").format(
+				"DD.MM.YYYY"
 			)}	
 Время: ${timeRangeToStringOutput(context.scene.state.event.timeRange)}
 Место: ${context.scene.state.event.place}
 Название: ${context.scene.state.event.title}
-Организатор: ${context.scene.state.event.organizer || 'не указан'}
+Организатор: ${context.scene.state.event.organizer || "не указан"}
 
 Выберите, что хочешь изменить.	
 `,
@@ -112,22 +116,46 @@ export const selectFieldStep: SceneStepWithDependencies<
 				});
 
 				if (result.isErr()) {
-					//TODO: обработка ошибок EXCLUDE
-					logStep(
-						context,
-						`User ${context.senderId} -> controller update error`,
-						'error',
-						result.error
-					);
-					return await context.send('Ошибка сервера');
+					if (result.error === "Event not found") {
+						logStep(
+							context,
+							`User ${context.senderId} -> event not found in confirm step of update scene`,
+							"warn"
+						);
+
+						return await context.send("Событие не найдено.");
+					}
+
+					if (result.error instanceof DatabaseConstraintError) {
+						logStep(
+							context,
+							`User ${context.senderId} -> database constraint error in confirm step of update scene`,
+							"warn",
+							result.error
+						);
+
+						return await context.send(
+							"Ошибка при обновлении события: Событие на это время и место уже существует."
+						);
+					}
+
+					if (result.error instanceof ValidationError) {
+						logStep(
+							context,
+							`User ${context.senderId} -> validation error in confirm step of update scene`,
+							"error",
+							result.error
+						);
+						return await context.send("Ошибка сервиса.");
+					}
 				}
 
-				await context.send('Событие успешно обновлено.');
+				await context.send("Событие успешно обновлено.");
 
 				logStep(
 					context,
 					`User ${context.senderId} -> passed select-field step`,
-					'info'
+					"info"
 				);
 				return await context.scene.leave();
 			}
@@ -135,7 +163,7 @@ export const selectFieldStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`User ${context.senderId} -> unknown command - ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command - ${context.messagePayload.command}`

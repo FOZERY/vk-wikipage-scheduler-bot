@@ -1,21 +1,21 @@
-import dayjs from 'dayjs';
-import { Keyboard, MessageContext } from 'vk-io';
-import { EventCollisionError } from '../../../../../../../modules/events/events.service.js';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import dayjs from "dayjs";
+import { Keyboard, MessageContext } from "vk-io";
+import { DatabaseConstraintError } from "../../../../../../../shared/errors.js";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
-import { getConfirmKeyboard } from '../../../keyboards/confirm.keyboard.js';
-import { EventSceneEnum } from '../../../types/events.types.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { timeRangeToStringOutput } from "../../../../shared/utils/time-utils.js";
+import { getConfirmKeyboard } from "../../../keyboards/confirm.keyboard.js";
+import { EventSceneEnum } from "../../../types/events.types.js";
 import {
 	AddEventSceneDependencies,
 	AddEventSceneState,
-} from '../add-event.scene.js';
+} from "../add-event.scene.js";
 
 export const confirmStep: SceneStepWithDependencies<
 	MessageContext,
@@ -26,12 +26,12 @@ export const confirmStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered confirm scene step`,
-			'info'
+			"info"
 		);
 
 		const dateFormattedString = dayjs(context.scene.state.event.date)
 			.tz()
-			.format('DD.MM.YYYY');
+			.format("DD.MM.YYYY");
 
 		return await context.send(
 			`	
@@ -40,14 +40,14 @@ export const confirmStep: SceneStepWithDependencies<
 Время: ${timeRangeToStringOutput(context.scene.state.event.timeRange)}			
 Место: ${context.scene.state.event.place}	
 Название: ${context.scene.state.event.title}
-Организатор: ${context.scene.state.event.organizer || 'Не указан'}
+Организатор: ${context.scene.state.event.organizer || "Не указан"}
 `,
 			{
 				keyboard: attachTextButtonToKeyboard(getConfirmKeyboard(), [
 					{
-						label: 'Начать заново',
+						label: "Начать заново",
 						payload: {
-							command: 'restartScene',
+							command: "restartScene",
 						},
 						color: Keyboard.SECONDARY_COLOR,
 					},
@@ -65,24 +65,24 @@ export const confirmStep: SceneStepWithDependencies<
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
 		switch (context.messagePayload.command) {
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.previous();
 			}
-			case 'leave': {
+			case "leave": {
 				return await context.scene.leave();
 			}
-			case 'restartScene': {
+			case "restartScene": {
 				context.scene.reset();
 				return await context.scene.enter(EventSceneEnum.addEvent);
 			}
-			case 'confirm': {
+			case "confirm": {
 				break;
 			}
 			default: {
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -90,7 +90,7 @@ export const confirmStep: SceneStepWithDependencies<
 			}
 		}
 	} else {
-		return await context.reply('Воспользуйся клавиатурой');
+		return await context.reply("Воспользуйся клавиатурой");
 	}
 
 	const result = await context.dependencies.eventsService.create({
@@ -103,31 +103,30 @@ export const confirmStep: SceneStepWithDependencies<
 	});
 
 	if (result.isErr()) {
-		if (result.error instanceof EventCollisionError) {
+		if (result.error instanceof DatabaseConstraintError) {
 			logStep(
 				context,
-				`User ${context.senderId} -> place is already taken`,
-				'info'
+				`User ${context.senderId} -> database constraint error while creating event`,
+				"warn",
+				result.error
 			);
-			return await context.reply(
-				`	
-Это место и время уже заняты событием "${result.error.collisionEvent.title}"
-${dayjs(result.error.collisionEvent.date).tz().format('DD.MM.YYYY')}	
-${timeRangeToStringOutput(result.error.collisionEvent.timeRange)}`
+
+			return await context.send(
+				"Ошибка при создании события: Событие на это время и место уже существует."
 			);
+		} else {
+			logStep(
+				context,
+				`User ${context.senderId} -> validation error while creating event`,
+				"error",
+				result.error
+			);
+
+			return await context.send("Ошибка сервиса.");
 		}
-
-		logStep(
-			context,
-			`User ${context.senderId} -> error while creating event`,
-			'error',
-			result.error
-		);
-
-		return await context.send('Ошибка сервиса.');
 	}
 
-	logStep(context, `User ${context.senderId} -> passed confirm step`, 'info');
-	await context.send('Событие успешно создано');
+	logStep(context, `User ${context.senderId} -> passed confirm step`, "info");
+	await context.send("Событие успешно создано");
 	return await context.scene.leave();
 };

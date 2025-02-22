@@ -1,25 +1,20 @@
-import { CronJob } from 'cron';
-import { EventsService } from '../../modules/events/events.service.js';
-import { logger } from '../logger/pino.js';
+import { CronJob } from "cron";
+import { EventsService } from "../../modules/events/events.service.js";
+import { logger } from "../logger/pino.js";
 
 const clogger = logger.child({
-	context: 'schedule-cron',
+	context: "schedule-cron",
 });
 
 export function getScheduleCronJob(eventsService: EventsService) {
 	return CronJob.from({
-		cronTime: '0 0 * * *',
+		cronTime: "0 0 * * *",
 		onTick: async () => {
-			const renderResult =
-				await eventsService.renderScheduleFromCurrentMonth();
+			await eventsService.renderScheduleFromCurrentMonth();
 
-			if (renderResult.isErr()) {
-				throw renderResult.error;
-			}
-
-			clogger.info('schedule-cron job -> executed');
+			clogger.info("schedule-cron job -> executed");
 		},
-		timeZone: 'Europe/Moscow',
+		timeZone: "Europe/Moscow",
 		unrefTimeout: true,
 		waitForCompletion: true,
 		errorHandler: (error) => {

@@ -1,7 +1,7 @@
-import { db } from '../../external/db/drizzle/index.js';
-import { ScheduleService } from '../../external/vk/api/wiki/schedule/schedule-service.js';
-import { EventsService } from './events.service.js';
-import { EventsRepositoryImpl } from './external/db/drizzle/events.repository.impl.js';
+import { db } from "../../external/db/drizzle/index.js";
+import { ScheduleService } from "../../external/vk/api/wiki/schedule/schedule-service.js";
+import { EventsService } from "./events.service.js";
+import { EventsRepositoryImpl } from "./external/db/drizzle/events.repository.impl.js";
 
 const eventsRepository = new EventsRepositoryImpl(db);
 

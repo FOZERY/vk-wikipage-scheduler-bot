@@ -1,13 +1,13 @@
-import { AllowArray, HearConditions, HearManager } from '@vk-io/hear';
-import { IScene, Middleware, SceneManager } from '@vk-io/scenes';
-import { SessionManager } from '@vk-io/session';
+import { AllowArray, HearConditions, HearManager } from "@vk-io/hear";
+import { IScene, Middleware, SceneManager } from "@vk-io/scenes";
+import { SessionManager } from "@vk-io/session";
 import {
 	VK as _VK,
 	Context,
 	MessageContextSubType,
 	MessageContextType,
-} from 'vk-io';
-import { MessageContextWithScene } from './shared/types/context.type.js';
+} from "vk-io";
+import { MessageContextWithScene } from "./shared/types/context.type.js";
 
 type VKOptions = {
 	token: string;
@@ -67,8 +67,8 @@ export class VKExtend extends _VK {
 			});
 		}
 
-		this.updates.on('message', this.sessionManager.middleware);
-		this.updates.on('message_new', [
+		this.updates.on("message", this.sessionManager.middleware);
+		this.updates.on("message_new", [
 			this.sceneManager.middleware,
 			this.sceneManager.middlewareIntercept,
 		]);

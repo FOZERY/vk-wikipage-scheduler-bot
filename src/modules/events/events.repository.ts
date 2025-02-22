@@ -1,23 +1,21 @@
-import { Result } from 'neverthrow';
-import { Nullable } from '../../shared/types/common.types.js';
-import { GetEventsByDateRangeDTO } from './event.dto.js';
-import { EventEntity } from './event.entity.js';
+import { Result } from "neverthrow";
+import { DatabaseConstraintError } from "../../shared/errors.js";
+import { Nullable } from "../../shared/types/common.types.js";
+import { GetEventsByDateRangeDTO } from "./event.dto.js";
+import { EventEntity } from "./event.entity.js";
 
 export interface EventsRepository {
-	getById(
-		id: number,
-		tx?: unknown
-	): Promise<Result<EventEntity | null, unknown>>;
+	getById(id: number, tx?: unknown): Promise<EventEntity | null>;
 
 	findEventsByTitleOrDate(
 		searchString: string,
 		tx?: unknown
-	): Promise<Result<EventEntity[], unknown>>;
+	): Promise<EventEntity[]>;
 
 	getEventsByDateRange(
 		month: GetEventsByDateRangeDTO,
 		tx?: unknown
-	): Promise<Result<EventEntity[], unknown>>;
+	): Promise<EventEntity[]>;
 
 	findCollisionsByDateTimePlace(
 		dto: {
@@ -30,11 +28,17 @@ export interface EventsRepository {
 			excludeId?: number;
 		},
 		tx?: unknown
-	): Promise<Result<EventEntity[], unknown>>;
+	): Promise<EventEntity[]>;
 
-	create(event: EventEntity, tx?: unknown): Promise<Result<void, unknown>>;
+	create(
+		event: EventEntity,
+		tx?: unknown
+	): Promise<Result<void, DatabaseConstraintError>>;
 
-	update(event: EventEntity, tx?: unknown): Promise<Result<void, unknown>>;
+	update(
+		event: EventEntity,
+		tx?: unknown
+	): Promise<Result<void, DatabaseConstraintError>>;
 
-	delete(id: number, tx?: unknown): Promise<Result<void, unknown>>;
+	delete(id: number, tx?: unknown): Promise<void>;
 }
