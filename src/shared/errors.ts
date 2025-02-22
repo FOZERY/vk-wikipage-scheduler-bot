@@ -1,21 +1,38 @@
-export type AppError = {
-	message: string;
-	error?: unknown;
-};
-
-export type ValidationError = AppError & {
-	input: any;
-	expected: any;
-};
-
-export function createAppError(message: string, error?: unknown): AppError {
-	return { message, error };
+export class AppError extends Error {
+	constructor(message: string, error?: unknown) {
+		super(message, { cause: error });
+		this.name = "AppError";
+	}
 }
 
-export function createValidationError(
-	message: string,
-	input: any,
-	expected: any
-): ValidationError {
-	return { message, input, expected };
+export class ValidationError extends AppError {
+	public input: any;
+	public expected: any;
+
+	constructor(message: string, input: any, expected: any) {
+		super(message);
+		this.input = input;
+		this.expected = expected;
+	}
+}
+
+export class DatabaseError extends AppError {
+	constructor(message: string, error?: unknown) {
+		super(message, { cause: error });
+	}
+}
+
+export class DatabaseConstraintError extends DatabaseError {
+	public constraint: string;
+
+	constructor(message: string, constraint: string, error: unknown) {
+		super(message, error);
+		this.constraint = constraint;
+	}
+}
+
+export class VKApiError extends AppError {
+	constructor(message: string, error: unknown) {
+		super(message, { cause: error });
+	}
 }

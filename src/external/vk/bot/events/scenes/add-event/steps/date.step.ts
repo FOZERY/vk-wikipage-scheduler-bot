@@ -1,30 +1,28 @@
-import { MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
-import { convertRussianDateStringToDefaultFormat } from '../../../../shared/utils/date-utils.js';
+import { MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
+import { convertRussianDateStringToDefaultFormat } from "../../../../shared/utils/date-utils.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { getDateKeyboard } from '../../../keyboards/date.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { getDateKeyboard } from "../../../keyboards/date.keyboard.js";
 import {
 	AddEventSceneDependencies,
 	AddEventSceneState,
-} from '../add-event.scene.js';
+} from "../add-event.scene.js";
 
 export const dateStep: SceneStepWithDependencies<
 	MessageContext,
 	AddEventSceneState,
 	AddEventSceneDependencies
 > = async (context) => {
-	// @ts-ignore
-	context.scene.state.event = {};
 	if (context.scene.step.firstTime) {
 		logStep(
 			context,
 			`User ${context.senderId} -> entered date scene step`,
-			'info'
+			"info"
 		);
 		return await context.send(
 			`
@@ -46,10 +44,10 @@ export const dateStep: SceneStepWithDependencies<
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
 		switch (context.messagePayload.command) {
-			case 'leave': {
+			case "leave": {
 				return await context.scene.leave();
 			}
-			case 'setDate': {
+			case "setDate": {
 				context.scene.state.event.date = context.messagePayload.date;
 				break;
 			}
@@ -57,7 +55,7 @@ export const dateStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -73,15 +71,15 @@ export const dateStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> entered invalid date`,
-				'warn',
+				"warn",
 				result.error
 			);
-			return await context.reply('Неправильный формат даты.');
+			return await context.reply("Неправильный формат даты.");
 		}
 
 		context.scene.state.event.date = result.value;
 	}
 
-	logStep(context, `User ${context.senderId} -> passed date step`, 'info');
+	logStep(context, `User ${context.senderId} -> passed date step`, "info");
 	return await context.scene.step.next();
 };

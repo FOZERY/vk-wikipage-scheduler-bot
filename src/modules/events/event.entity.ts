@@ -1,7 +1,7 @@
-import dayjs from 'dayjs';
-import { err, ok, Result } from 'neverthrow';
-import { createValidationError, ValidationError } from '../../shared/errors.js';
-import { Nullable } from '../../shared/types/common.types.js';
+import dayjs from "dayjs";
+import { err, ok, Result } from "neverthrow";
+import { ValidationError } from "../../shared/errors.js";
+import { Nullable } from "../../shared/types/common.types.js";
 
 export interface EventEntityProps {
 	id?: number;
@@ -44,9 +44,9 @@ export class EventEntity {
 					startTime: props.timeRange.startTime,
 					endTime: props.timeRange.endTime
 						? props.timeRange.endTime
-						: dayjs(props.timeRange.startTime, 'HH:mm:ss')
-								.add(15, 'minute')
-								.format('HH:mm:ss'),
+						: dayjs(props.timeRange.startTime, "HH:mm:ss")
+								.add(15, "minute")
+								.format("HH:mm:ss"),
 			  }
 			: null;
 		this._organizer = props.organizer;
@@ -60,26 +60,26 @@ export class EventEntity {
 	): Result<EventEntity, ValidationError> {
 		if (
 			props.timeRange &&
-			!dayjs(props.timeRange.startTime, 'HH:mm:ss', true).isValid()
+			!dayjs(props.timeRange.startTime, "HH:mm:ss", true).isValid()
 		) {
 			return err(
-				createValidationError(
-					'startTime must be in the format HH:mm:ss',
+				new ValidationError(
+					"startTime must be in the format HH:mm:ss",
 					props.timeRange.startTime,
-					'HH:mm:ss'
+					"HH:mm:ss"
 				)
 			);
 		}
 		if (
 			props.timeRange &&
 			props.timeRange.endTime &&
-			!dayjs(props.timeRange.endTime, 'HH:mm:ss', true).isValid()
+			!dayjs(props.timeRange.endTime, "HH:mm:ss", true).isValid()
 		) {
 			return err(
-				createValidationError(
-					'endTime must be in the format HH:mm:ss',
+				new ValidationError(
+					"endTime must be in the format HH:mm:ss",
 					props.timeRange.endTime,
-					'HH:mm:ss'
+					"HH:mm:ss"
 				)
 			);
 		}
@@ -91,59 +91,59 @@ export class EventEntity {
 			)
 		) {
 			return err(
-				createValidationError(
-					'startTime must be before endTime',
+				new ValidationError(
+					"startTime must be before endTime",
 					{
 						startTime: props.timeRange.startTime,
 						endTime: props.timeRange.endTime,
 					},
-					'startTime < endTime'
+					"startTime < endTime"
 				)
 			);
 		}
 
 		if (props.title.length > 255) {
 			return err(
-				createValidationError(
-					'title must be less than 255 characters',
+				new ValidationError(
+					"title must be less than 255 characters",
 					props.title,
-					'< 255'
+					"< 255"
 				)
 			);
 		}
 		if (props.place.length > 255) {
 			return err(
-				createValidationError(
-					'place must be less than 255 characters',
+				new ValidationError(
+					"place must be less than 255 characters",
 					props.place,
-					'< 255'
+					"< 255"
 				)
 			);
 		}
 		if (props.lastUpdaterId <= 0) {
 			return err(
-				createValidationError(
-					'lastUpdaterId must be greater than 0',
+				new ValidationError(
+					"lastUpdaterId must be greater than 0",
 					props.lastUpdaterId,
-					'> 0'
+					"> 0"
 				)
 			);
 		}
 		if (props.organizer && props.organizer.length > 255) {
 			return err(
-				createValidationError(
-					'organizer must be less than 255 characters',
+				new ValidationError(
+					"organizer must be less than 255 characters",
 					props.organizer,
-					'< 255'
+					"< 255"
 				)
 			);
 		}
-		if (!dayjs(props.date, 'YYYY-MM-DD', true).isValid()) {
+		if (!dayjs(props.date, "YYYY-MM-DD", true).isValid()) {
 			return err(
-				createValidationError(
-					'date must be in the format YYYY-MM-DD',
+				new ValidationError(
+					"date must be in the format YYYY-MM-DD",
 					props.date,
-					'YYYY-MM-DD'
+					"YYYY-MM-DD"
 				)
 			);
 		}
@@ -203,10 +203,10 @@ export class EventEntity {
 	public setTitle(title: string): Result<void, ValidationError> {
 		if (title.length > 255) {
 			return err(
-				createValidationError(
-					'title must be less than 255 characters',
+				new ValidationError(
+					"title must be less than 255 characters",
 					title,
-					'< 255'
+					"< 255"
 				)
 			);
 		}
@@ -215,12 +215,12 @@ export class EventEntity {
 	}
 
 	public setDate(date: string): Result<void, ValidationError> {
-		if (!dayjs(date, 'YYYY-MM-DD', true).isValid()) {
+		if (!dayjs(date, "YYYY-MM-DD", true).isValid()) {
 			return err(
-				createValidationError(
-					'date must be in the format YYYY-MM-DD',
+				new ValidationError(
+					"date must be in the format YYYY-MM-DD",
 					date,
-					'YYYY-MM-DD'
+					"YYYY-MM-DD"
 				)
 			);
 		}
@@ -231,10 +231,10 @@ export class EventEntity {
 	public setPlace(place: string): Result<void, ValidationError> {
 		if (place.length > 255) {
 			return err(
-				createValidationError(
-					'place must be less than 255 characters',
+				new ValidationError(
+					"place must be less than 255 characters",
 					place,
-					'< 255'
+					"< 255"
 				)
 			);
 		}
@@ -253,25 +253,25 @@ export class EventEntity {
 			return ok(undefined);
 		}
 
-		if (!dayjs(timeRange.startTime, 'HH:mm:ss', true).isValid()) {
+		if (!dayjs(timeRange.startTime, "HH:mm:ss", true).isValid()) {
 			return err(
-				createValidationError(
-					'startTime must be in the format HH:mm:ss',
+				new ValidationError(
+					"startTime must be in the format HH:mm:ss",
 					timeRange.startTime,
-					'HH:mm:ss'
+					"HH:mm:ss"
 				)
 			);
 		}
 
 		if (
 			timeRange.endTime &&
-			!dayjs(timeRange.endTime, 'HH:mm:ss', true).isValid()
+			!dayjs(timeRange.endTime, "HH:mm:ss", true).isValid()
 		) {
 			return err(
-				createValidationError(
-					'endTime must be in the format HH:mm:ss',
+				new ValidationError(
+					"endTime must be in the format HH:mm:ss",
 					timeRange.endTime,
-					'HH:mm:ss'
+					"HH:mm:ss"
 				)
 			);
 		}
@@ -281,21 +281,21 @@ export class EventEntity {
 			dayjs(timeRange.startTime).isAfter(dayjs(timeRange.endTime))
 		) {
 			return err(
-				createValidationError(
-					'startTime must be before endTime',
+				new ValidationError(
+					"startTime must be before endTime",
 					{
 						startTime: timeRange.startTime,
 						endTime: timeRange.endTime,
 					},
-					'startTime < endTime'
+					"startTime < endTime"
 				)
 			);
 		}
 
 		if (!timeRange.endTime) {
-			timeRange.endTime = dayjs(timeRange.startTime, 'HH:mm:ss')
-				.add(15, 'minutes')
-				.format('HH:mm:ss');
+			timeRange.endTime = dayjs(timeRange.startTime, "HH:mm:ss")
+				.add(15, "minutes")
+				.format("HH:mm:ss");
 		}
 
 		return ok(undefined);
@@ -306,10 +306,10 @@ export class EventEntity {
 	): Result<void, ValidationError> {
 		if (organizer && organizer.length > 255) {
 			return err(
-				createValidationError(
-					'organizer must be less than 255 characters',
+				new ValidationError(
+					"organizer must be less than 255 characters",
 					organizer,
-					'< 255'
+					"< 255"
 				)
 			);
 		}
@@ -320,10 +320,10 @@ export class EventEntity {
 	public setLastUpdaterId(id: number): Result<void, ValidationError> {
 		if (id <= 0) {
 			return err(
-				createValidationError(
-					'lastUpdaterId must be greater than 0',
+				new ValidationError(
+					"lastUpdaterId must be greater than 0",
 					id,
-					'> 0'
+					"> 0"
 				)
 			);
 		}

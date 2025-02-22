@@ -1,6 +1,19 @@
-import { MessageContextWithScene } from '../../shared/types/context.type.js';
-import { EventSceneEnum } from '../types/events.types.js';
+import { MessageContextWithScene } from "../../shared/types/context.type.js";
+import { AddEventSceneState } from "../scenes/add-event/add-event.scene.js";
+import { EventSceneEnum } from "../types/events.types.js";
 
 export async function addEventCommand(context: MessageContextWithScene) {
-	await context.scene.enter(EventSceneEnum.addEvent);
+	await context.scene.enter(EventSceneEnum.addEvent, {
+		state: {
+			event: {
+				date: "",
+				title: "",
+				description: "",
+				place: "",
+				timeRange: null,
+				organizer: "",
+				lastUpdaterId: context.senderId,
+			},
+		} as AddEventSceneState,
+	});
 }
