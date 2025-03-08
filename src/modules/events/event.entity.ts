@@ -298,6 +298,11 @@ export class EventEntity {
 				.format("HH:mm:ss");
 		}
 
+		this._timeRange = {
+			startTime: timeRange.startTime,
+			endTime: timeRange.endTime,
+		};
+
 		return ok(undefined);
 	}
 
