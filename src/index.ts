@@ -111,6 +111,8 @@ async function gracefulShutdown(withError: boolean) {
 	logger.warn("Stopping renderJob");
 	renderJob.stop();
 	logger.warn("Stopping bot polling...");
+	await vk.updates.stop();
+	logger.warn("App stopped");
 	process.exit(withError ? 1 : 0);
 }
 
