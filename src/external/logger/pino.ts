@@ -1,19 +1,19 @@
-import { pino, TransportTargetOptions } from 'pino';
+import { pino, TransportTargetOptions } from "pino";
 
 const targets: TransportTargetOptions[] = [];
 
-if (process.env.PRETTY_LOGS === 'true') {
+if (process.env.PRETTY_LOGS === "true") {
 	targets.push({
-		target: 'pino-pretty',
+		target: "pino-pretty",
 		options: {
 			singleLine: true,
 		},
 	});
 }
 
-if (process.env.LOG_TO_LOGTAIL === 'true') {
+if (process.env.LOG_TO_LOGTAIL === "true") {
 	targets.push({
-		target: '@logtail/pino',
+		target: "@logtail/pino",
 		options: {
 			sourceToken: process.env.LOGTAIL_TOKEN,
 			options: { endpoint: process.env.LOGTAIL_URL },
@@ -22,7 +22,7 @@ if (process.env.LOG_TO_LOGTAIL === 'true') {
 }
 
 export const logger = pino({
-	level: process.env.LOG_LEVEL ?? 'info',
+	level: process.env.LOG_LEVEL ?? "info",
 	transport: {
 		targets: targets,
 	},

@@ -1,31 +1,31 @@
-import { Keyboard } from 'vk-io';
+import { Keyboard } from "vk-io";
 
 export const mainMenuKeyboard = Keyboard.builder()
 	.textButton({
-		label: 'Добавить в расписание',
+		label: "Добавить в расписание",
 		color: Keyboard.POSITIVE_COLOR,
 		payload: {
-			command: 'addEvent',
+			command: "addEvent",
 		},
 	})
 	.row()
 	.textButton({
-		label: 'Изменить расписание',
+		label: "Изменить расписание",
 		color: Keyboard.PRIMARY_COLOR,
 		payload: {
-			command: 'updateEvent',
+			command: "updateEvent",
 		},
 	})
 	.row()
 	.textButton({
-		label: 'Удалить из расписания',
+		label: "Удалить из расписания",
 		color: Keyboard.NEGATIVE_COLOR,
 		payload: {
-			command: 'deleteEvent',
+			command: "deleteEvent",
 		},
 	})
 	.row()
 	.urlButton({
-		label: 'Перейти к расписанию',
+		label: "Перейти к расписанию",
 		url: process.env.PAGE_URL!,
 	});

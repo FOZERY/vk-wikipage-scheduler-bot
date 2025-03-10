@@ -1,18 +1,18 @@
-import { MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import { MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { parseTimeString } from '../../../../shared/utils/time-utils.js';
-import { getTimeKeyboard } from '../../../keyboards/time.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { parseTimeString } from "../../../../shared/utils/time-utils.js";
+import { getTimeKeyboard } from "../../../keyboards/time.keyboard.js";
 import {
 	AddEventSceneDependencies,
 	AddEventSceneState,
-} from '../add-event.scene.js';
+} from "../add-event.scene.js";
 
 export const timeStep: SceneStepWithDependencies<
 	MessageContext,
@@ -23,7 +23,7 @@ export const timeStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered time scene step`,
-			'info'
+			"info"
 		);
 		return await context.send(
 			`		
@@ -49,13 +49,13 @@ export const timeStep: SceneStepWithDependencies<
 
 	if (context.hasMessagePayload) {
 		switch (context.messagePayload.command) {
-			case 'leave': {
+			case "leave": {
 				return await context.scene.leave();
 			}
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.previous();
 			}
-			case 'setTime': {
+			case "setTime": {
 				context.scene.state.event.timeRange =
 					context.messagePayload.timeRange;
 				break;
@@ -64,7 +64,7 @@ export const timeStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -80,10 +80,10 @@ export const timeStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> entered invalid time`,
-				'warn',
+				"warn",
 				parseTimeResult.error
 			);
-			return await context.reply('Неверный формат времени.');
+			return await context.reply("Неверный формат времени.");
 		}
 
 		context.scene.state.event.timeRange = {
@@ -92,6 +92,6 @@ export const timeStep: SceneStepWithDependencies<
 		};
 	}
 
-	logStep(context, `User ${context.senderId} -> passed time step`, 'info');
+	logStep(context, `User ${context.senderId} -> passed time step`, "info");
 	return await context.scene.step.next();
 };

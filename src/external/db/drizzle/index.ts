@@ -1,7 +1,7 @@
-import { ExtractTablesWithRelations } from 'drizzle-orm';
-import { PgTransaction } from 'drizzle-orm/pg-core';
-import { drizzle, PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { ExtractTablesWithRelations } from "drizzle-orm";
+import { PgTransaction } from "drizzle-orm/pg-core";
+import { drizzle, PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 const client = postgres(process.env.DATABASE_URL!, { prepare: false });
 export const db = drizzle({ client });

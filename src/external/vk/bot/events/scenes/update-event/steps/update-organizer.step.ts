@@ -1,17 +1,17 @@
-import { MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import { MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { getOrganizerKeyboard } from '../../../keyboards/organizer.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { getOrganizerKeyboard } from "../../../keyboards/organizer.keyboard.js";
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
 	UpdateEventSceneStepNumber,
-} from '../update-event.scene.js';
+} from "../update-event.scene.js";
 
 export const updateOrganizerStep: SceneStepWithDependencies<
 	MessageContext,
@@ -22,7 +22,7 @@ export const updateOrganizerStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered update-organizer step`,
-			'info'
+			"info"
 		);
 
 		return await context.send(`Введи имя организатора.`, {
@@ -40,12 +40,12 @@ export const updateOrganizerStep: SceneStepWithDependencies<
 		// если ввели с клавиатуры
 		const payload = context.messagePayload;
 		switch (payload.command) {
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.go(
 					UpdateEventSceneStepNumber.SelectFieldOrConfirm
 				);
 			}
-			case 'setNoOrganizer': {
+			case "setNoOrganizer": {
 				context.scene.state.event.organizer = null;
 				break;
 			}
@@ -53,9 +53,9 @@ export const updateOrganizerStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${payload.command}`,
-					'error'
+					"error"
 				);
-				throw new Error('Unknown command');
+				throw new Error("Unknown command");
 			}
 		}
 	} else {
@@ -65,7 +65,7 @@ export const updateOrganizerStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> too long (>255) organizer`,
-				'info'
+				"info"
 			);
 			return await context.reply(`Слишком длинное имя организатора.`);
 		}
@@ -76,7 +76,7 @@ export const updateOrganizerStep: SceneStepWithDependencies<
 	logStep(
 		context,
 		`User ${context.senderId} -> passed update-organizer step`,
-		'info'
+		"info"
 	);
 	return await context.scene.step.go(
 		UpdateEventSceneStepNumber.SelectFieldOrConfirm

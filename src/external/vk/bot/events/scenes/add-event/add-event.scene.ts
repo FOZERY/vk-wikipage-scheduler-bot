@@ -1,14 +1,14 @@
-import { Logger } from 'pino';
-import { MessageContext } from 'vk-io';
-import { EventsService } from '../../../../../../modules/events/events.service.js';
-import { eventsService } from '../../../../../../modules/events/index.js';
-import { logger } from '../../../../../logger/pino.js';
-import { mainMenuKeyboard } from '../../../shared/keyboards/main-menu.keyboard.js';
-import { mainMenuMessage } from '../../../shared/messages/mainMenu.message.js';
-import { ViewEvent } from '../../../shared/types/common.types.js';
-import { getContextPartForLogging } from '../../../shared/utils/logger-messages.js';
-import { createScene } from '../../../shared/utils/scene-utils.js';
-import { EventSceneEnum } from '../../types/events.types.js';
+import { Logger } from "pino";
+import { MessageContext } from "vk-io";
+import { EventsService } from "../../../../../../modules/events/events.service.js";
+import { eventsService } from "../../../../../../modules/events/index.js";
+import { logger } from "../../../../../logger/pino.js";
+import { mainMenuKeyboard } from "../../../shared/keyboards/main-menu.keyboard.js";
+import { mainMenuMessage } from "../../../shared/messages/mainMenu.message.js";
+import { ViewEvent } from "../../../shared/types/common.types.js";
+import { getContextPartForLogging } from "../../../shared/utils/logger-messages.js";
+import { createScene } from "../../../shared/utils/scene-utils.js";
+import { EventSceneEnum } from "../../types/events.types.js";
 import {
 	confirmStep,
 	dateStep,
@@ -16,7 +16,7 @@ import {
 	placeStep,
 	timeStep,
 	titleStep,
-} from './steps/index.js';
+} from "./steps/index.js";
 
 export type AddEventSceneState = {
 	event: ViewEvent;
@@ -38,7 +38,7 @@ export const addEventScene = createScene<
 		dependencies: {
 			eventsService: eventsService,
 			logger: logger.child({
-				scene: 'add-event',
+				scene: "add-event",
 			}),
 		},
 		leaveHandler: async (context) => {

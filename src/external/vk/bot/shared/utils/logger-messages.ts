@@ -1,5 +1,5 @@
-import { Level } from 'pino';
-import { Context } from 'vk-io';
+import { Level } from "pino";
+import { Context } from "vk-io";
 
 export function getContextPartForLogging(context: Context) {
 	return {

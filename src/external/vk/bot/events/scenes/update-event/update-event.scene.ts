@@ -1,15 +1,15 @@
-import { Logger } from 'pino';
-import { MessageContext } from 'vk-io';
-import { UpdateEventDTO } from '../../../../../../modules/events/event.dto.js';
-import { EventsService } from '../../../../../../modules/events/events.service.js';
-import { eventsService } from '../../../../../../modules/events/index.js';
-import { logger } from '../../../../../logger/pino.js';
-import { mainMenuKeyboard } from '../../../shared/keyboards/main-menu.keyboard.js';
-import { mainMenuMessage } from '../../../shared/messages/mainMenu.message.js';
-import { ViewEvent } from '../../../shared/types/common.types.js';
-import { getContextPartForLogging } from '../../../shared/utils/logger-messages.js';
-import { createScene } from '../../../shared/utils/scene-utils.js';
-import { EventSceneEnum } from '../../types/events.types.js';
+import { Logger } from "pino";
+import { MessageContext } from "vk-io";
+import { UpdateEventDTO } from "../../../../../../modules/events/event.dto.js";
+import { EventsService } from "../../../../../../modules/events/events.service.js";
+import { eventsService } from "../../../../../../modules/events/index.js";
+import { logger } from "../../../../../logger/pino.js";
+import { mainMenuKeyboard } from "../../../shared/keyboards/main-menu.keyboard.js";
+import { mainMenuMessage } from "../../../shared/messages/mainMenu.message.js";
+import { ViewEvent } from "../../../shared/types/common.types.js";
+import { getContextPartForLogging } from "../../../shared/utils/logger-messages.js";
+import { createScene } from "../../../shared/utils/scene-utils.js";
+import { EventSceneEnum } from "../../types/events.types.js";
 import {
 	findEventStep,
 	selectFieldStep,
@@ -18,7 +18,7 @@ import {
 	updatePlaceStep,
 	updateTimeStep,
 	updateTitleStep,
-} from './steps/index.js';
+} from "./steps/index.js";
 
 export type UpdateEventSceneState = {
 	event: ViewEvent;
@@ -58,7 +58,7 @@ export const updateEventScene = createScene<
 		dependencies: {
 			eventsService: eventsService,
 			logger: logger.child({
-				scene: 'update-event',
+				scene: "update-event",
 			}),
 		},
 		leaveHandler: async (context) => {

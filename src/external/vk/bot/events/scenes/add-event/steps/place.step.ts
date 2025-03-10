@@ -1,19 +1,19 @@
-import dayjs from 'dayjs';
-import { MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import dayjs from "dayjs";
+import { MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { timeRangeToStringOutput } from '../../../../shared/utils/time-utils.js';
-import { getPlaceKeyboard } from '../../../keyboards/place.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { timeRangeToStringOutput } from "../../../../shared/utils/time-utils.js";
+import { getPlaceKeyboard } from "../../../keyboards/place.keyboard.js";
 import {
 	AddEventSceneDependencies,
 	AddEventSceneState,
-} from '../add-event.scene.js';
+} from "../add-event.scene.js";
 
 export const organizerStep: SceneStepWithDependencies<
 	MessageContext,
@@ -24,7 +24,7 @@ export const organizerStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered place scene step`,
-			'info'
+			"info"
 		);
 		return await context.send(
 			`
@@ -46,13 +46,13 @@ export const organizerStep: SceneStepWithDependencies<
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
 		switch (context.messagePayload.command) {
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.previous();
 			}
-			case 'leave': {
+			case "leave": {
 				return await context.scene.leave();
 			}
-			case 'setPlace': {
+			case "setPlace": {
 				context.scene.state.event.place = context.messagePayload.place;
 				break;
 			}
@@ -60,7 +60,7 @@ export const organizerStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -75,9 +75,9 @@ export const organizerStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> too long (>255) place name - ${parsedText}`,
-				'info'
+				"info"
 			);
-			return await context.reply('Слишком длинное название места.');
+			return await context.reply("Слишком длинное название места.");
 		}
 
 		context.scene.state.event.place = parsedText;
@@ -94,26 +94,26 @@ export const organizerStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> error in eventsController`,
-			'error',
+			"error",
 			result.error
 		);
-		return await context.send('Ошибка сервиса.');
+		return await context.send("Ошибка сервиса.");
 	}
 
 	if (result.value.length > 0) {
 		logStep(
 			context,
 			`User ${context.senderId} -> place is already taken`,
-			'info'
+			"info"
 		);
 		return await context.reply(
 			`
 Это место и время уже заняты событием "${result.value[0].title}"
-${dayjs(result.value[0].date).tz().format('DD.MM.YYYY')}	
+${dayjs(result.value[0].date).tz().format("DD.MM.YYYY")}	
 ${timeRangeToStringOutput(result.value[0].timeRange)}`
 		);
 	}
 
-	logStep(context, `User ${context.senderId} -> passed place step`, 'info');
+	logStep(context, `User ${context.senderId} -> passed place step`, "info");
 	return await context.scene.step.next();
 };

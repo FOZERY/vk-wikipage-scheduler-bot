@@ -1,17 +1,17 @@
-import { MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import { MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { getOrganizerKeyboard } from '../../../keyboards/organizer.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { getOrganizerKeyboard } from "../../../keyboards/organizer.keyboard.js";
 import {
 	AddEventSceneDependencies,
 	AddEventSceneState,
-} from '../add-event.scene.js';
+} from "../add-event.scene.js";
 
 export const placeStep: SceneStepWithDependencies<
 	MessageContext,
@@ -22,7 +22,7 @@ export const placeStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered organizer scene step`,
-			'info'
+			"info"
 		);
 		return await context.send(
 			`
@@ -44,13 +44,13 @@ export const placeStep: SceneStepWithDependencies<
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
 		switch (context.messagePayload.command) {
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.previous();
 			}
-			case 'leave': {
+			case "leave": {
 				return await context.scene.leave();
 			}
-			case 'setNoOrganizer': {
+			case "setNoOrganizer": {
 				context.scene.state.event.organizer = null;
 				break;
 			}
@@ -58,7 +58,7 @@ export const placeStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -73,7 +73,7 @@ export const placeStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> too long (>255) organizer`,
-				'info'
+				"info"
 			);
 			return await context.reply(`Слишком длинное имя организатора.`);
 		}
@@ -84,7 +84,7 @@ export const placeStep: SceneStepWithDependencies<
 	logStep(
 		context,
 		`User ${context.senderId} -> passed organizer step`,
-		'info'
+		"info"
 	);
 	return await context.scene.step.next();
 };

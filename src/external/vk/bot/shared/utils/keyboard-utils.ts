@@ -1,8 +1,8 @@
-import { IKeyboardTextButtonOptions, Keyboard, KeyboardBuilder } from 'vk-io';
+import { IKeyboardTextButtonOptions, Keyboard, KeyboardBuilder } from "vk-io";
 
 export enum NavigationButtonsCommand {
-	Previous = 'previous',
-	Leave = 'leave',
+	Previous = "previous",
+	Leave = "leave",
 }
 
 export const previousButtonOptions: IKeyboardTextButtonOptions = {

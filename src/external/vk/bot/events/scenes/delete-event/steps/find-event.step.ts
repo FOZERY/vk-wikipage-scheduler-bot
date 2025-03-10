@@ -1,15 +1,15 @@
-import { Keyboard, MessageContext } from 'vk-io';
+import { Keyboard, MessageContext } from "vk-io";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { selectEventKeyboard } from '../../../keyboards/select-event.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { selectEventKeyboard } from "../../../keyboards/select-event.keyboard.js";
 import {
 	DeleteEventSceneDependencies,
 	DeleteEventSceneState,
-} from '../delete-event.scene.js';
+} from "../delete-event.scene.js";
 
 export const findEventStep: SceneStepWithDependencies<
 	MessageContext,
@@ -20,7 +20,7 @@ export const findEventStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered find-event step`,
-			'info'
+			"info"
 		);
 
 		return await context.send(
@@ -43,10 +43,10 @@ export const findEventStep: SceneStepWithDependencies<
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
 		switch (context.messagePayload.command) {
-			case 'leave': {
+			case "leave": {
 				return await context.scene.leave();
 			}
-			case 'selectEvent': {
+			case "selectEvent": {
 				context.scene.state.event = context.messagePayload.event;
 				break;
 			}
@@ -54,7 +54,7 @@ export const findEventStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -73,23 +73,23 @@ export const findEventStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> error while finding events`,
-				'error',
+				"error",
 				result.error
 			);
-			return await context.send('Ошибка сервера.');
+			return await context.send("Ошибка сервера.");
 		}
 
 		if (result.value.length === 0) {
 			logStep(
 				context,
 				`User ${context.senderId} -> events not found`,
-				'info'
+				"info"
 			);
-			return await context.send('События не найдены.');
+			return await context.send("События не найдены.");
 		}
 
 		return await context.send(
-			'Выбери событие для удаления, либо продолжи поиск.',
+			"Выбери событие для удаления, либо продолжи поиск.",
 			{
 				keyboard: attachTextButtonToKeyboard(
 					selectEventKeyboard(result.value),
@@ -102,7 +102,7 @@ export const findEventStep: SceneStepWithDependencies<
 	logStep(
 		context,
 		`User ${context.senderId} -> passed find-event step`,
-		'info'
+		"info"
 	);
 	return await context.scene.step.next();
 };

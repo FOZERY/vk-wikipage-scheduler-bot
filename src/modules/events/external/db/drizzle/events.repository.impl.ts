@@ -46,7 +46,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 				? {
 						startTime: event[0].time_range.startTime.value,
 						endTime: event[0].time_range.endTime.value,
-				  }
+					}
 				: null;
 			const eventResult = EventEntity.create({
 				id: event[0].id,
@@ -128,7 +128,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					? {
 							startTime: event.time_range.startTime.value,
 							endTime: event.time_range.endTime.value,
-					  }
+						}
 					: null;
 				const eventResult = EventEntity.create({
 					id: event.id,
@@ -178,7 +178,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 								eventsTable.date,
 								month.startDate,
 								month.endDate
-						  )
+							)
 						: gte(eventsTable.date, month.startDate)
 				)
 				.orderBy(
@@ -193,7 +193,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					? {
 							startTime: event.time_range.startTime.value,
 							endTime: event.time_range.endTime.value,
-					  }
+						}
 					: null;
 				const eventResult = EventEntity.create({
 					id: event.id,
@@ -266,7 +266,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					? {
 							startTime: event.time_range.startTime.value,
 							endTime: event.time_range.endTime.value,
-					  }
+						}
 					: null;
 				const eventResult = EventEntity.create({
 					id: event.id,
@@ -313,7 +313,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 						value: event.timeRange.startTime,
 					},
 					endTime: { strict: false, value: event.timeRange.endTime },
-			  }
+				}
 			: null;
 
 		try {
@@ -364,7 +364,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 						value: event.timeRange.startTime,
 					},
 					endTime: { strict: false, value: event.timeRange.endTime },
-			  }
+				}
 			: null;
 
 		try {

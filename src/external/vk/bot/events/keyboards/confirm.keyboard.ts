@@ -1,10 +1,10 @@
-import { Keyboard } from 'vk-io';
+import { Keyboard } from "vk-io";
 
 export const getConfirmKeyboard = () =>
 	Keyboard.builder().textButton({
-		label: 'Подтвердить',
+		label: "Подтвердить",
 		payload: {
-			command: 'confirm',
+			command: "confirm",
 		},
 		color: Keyboard.POSITIVE_COLOR,
 	});

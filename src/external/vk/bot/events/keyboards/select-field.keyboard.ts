@@ -1,18 +1,18 @@
-import { Keyboard } from 'vk-io';
+import { Keyboard } from "vk-io";
 
 export enum SelectField {
-	Date = 'date',
-	Time = 'time',
-	Place = 'place',
-	Title = 'title',
-	Organizer = 'organizer',
+	Date = "date",
+	Time = "time",
+	Place = "place",
+	Title = "title",
+	Organizer = "organizer",
 }
 
 export enum SelectFieldKeyboardCommand {
-	SelectField = 'selectField',
-	Previous = 'previous',
-	Leave = 'leave',
-	Confirm = 'confirm',
+	SelectField = "selectField",
+	Previous = "previous",
+	Leave = "leave",
+	Confirm = "confirm",
 }
 
 export type SelectFieldKeyboardPayload = {
@@ -23,35 +23,35 @@ export type SelectFieldKeyboardPayload = {
 export const getSelectFieldOrConfirmKeyboard = () =>
 	Keyboard.builder()
 		.textButton({
-			label: 'Дату',
+			label: "Дату",
 			color: Keyboard.PRIMARY_COLOR,
-			payload: { command: 'selectField', field: SelectField.Date },
+			payload: { command: "selectField", field: SelectField.Date },
 		})
 		.textButton({
-			label: 'Время',
+			label: "Время",
 			color: Keyboard.PRIMARY_COLOR,
-			payload: { command: 'selectField', field: SelectField.Time },
-		})
-		.row()
-		.textButton({
-			label: 'Место',
-			color: Keyboard.PRIMARY_COLOR,
-			payload: { command: 'selectField', field: SelectField.Place },
-		})
-		.textButton({
-			label: 'Название',
-			color: Keyboard.PRIMARY_COLOR,
-			payload: { command: 'selectField', field: SelectField.Title },
+			payload: { command: "selectField", field: SelectField.Time },
 		})
 		.row()
 		.textButton({
-			label: 'Организатора',
+			label: "Место",
 			color: Keyboard.PRIMARY_COLOR,
-			payload: { command: 'selectField', field: SelectField.Organizer },
+			payload: { command: "selectField", field: SelectField.Place },
+		})
+		.textButton({
+			label: "Название",
+			color: Keyboard.PRIMARY_COLOR,
+			payload: { command: "selectField", field: SelectField.Title },
 		})
 		.row()
 		.textButton({
-			label: 'Подтвердить',
+			label: "Организатора",
+			color: Keyboard.PRIMARY_COLOR,
+			payload: { command: "selectField", field: SelectField.Organizer },
+		})
+		.row()
+		.textButton({
+			label: "Подтвердить",
 			color: Keyboard.POSITIVE_COLOR,
-			payload: { command: 'confirm' },
+			payload: { command: "confirm" },
 		});

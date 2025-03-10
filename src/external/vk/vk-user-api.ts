@@ -1,5 +1,5 @@
-import { API } from 'vk-io';
+import { API } from "vk-io";
 
 export const vkUserApi = new API({
-	token: process.env.USER_TOKEN ?? '',
+	token: process.env.USER_TOKEN ?? "",
 });

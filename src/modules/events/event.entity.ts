@@ -47,7 +47,7 @@ export class EventEntity {
 						: dayjs(props.timeRange.startTime, "HH:mm:ss")
 								.add(15, "minute")
 								.format("HH:mm:ss"),
-			  }
+				}
 			: null;
 		this._organizer = props.organizer;
 		this._lastUpdaterId = props.lastUpdaterId;

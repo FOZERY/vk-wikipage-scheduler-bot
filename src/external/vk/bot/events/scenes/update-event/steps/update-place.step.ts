@@ -1,17 +1,17 @@
-import { MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import { MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { getPlaceKeyboard } from '../../../keyboards/place.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { getPlaceKeyboard } from "../../../keyboards/place.keyboard.js";
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
 	UpdateEventSceneStepNumber,
-} from '../update-event.scene.js';
+} from "../update-event.scene.js";
 
 export const updatePlaceStep: SceneStepWithDependencies<
 	MessageContext,
@@ -22,7 +22,7 @@ export const updatePlaceStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered update-place step`,
-			'info'
+			"info"
 		);
 
 		return await context.send(
@@ -43,12 +43,12 @@ export const updatePlaceStep: SceneStepWithDependencies<
 		// если ввели с клавиатуры
 		const payload = context.messagePayload;
 		switch (payload.command) {
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.go(
 					UpdateEventSceneStepNumber.SelectFieldOrConfirm
 				);
 			}
-			case 'setPlace': {
+			case "setPlace": {
 				context.scene.state.event.place = payload.place;
 				break;
 			}
@@ -56,9 +56,9 @@ export const updatePlaceStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${payload.command}`,
-					'error'
+					"error"
 				);
-				throw new Error('Unknown command');
+				throw new Error("Unknown command");
 			}
 		}
 	} else {
@@ -68,9 +68,9 @@ export const updatePlaceStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> too long (>255) place name - ${parsedText}`,
-				'info'
+				"info"
 			);
-			return await context.reply('Слишком длинное название места.');
+			return await context.reply("Слишком длинное название места.");
 		}
 
 		context.scene.state.event.place = parsedText;
@@ -79,7 +79,7 @@ export const updatePlaceStep: SceneStepWithDependencies<
 	logStep(
 		context,
 		`User ${context.senderId} -> passed update-place step`,
-		'info'
+		"info"
 	);
 	return await context.scene.step.go(
 		UpdateEventSceneStepNumber.SelectFieldOrConfirm

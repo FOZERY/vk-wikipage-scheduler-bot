@@ -1,10 +1,10 @@
-import { Keyboard } from 'vk-io';
+import { Keyboard } from "vk-io";
 
 export const getOrganizerKeyboard = () =>
 	Keyboard.builder().textButton({
-		label: 'Без организатора',
+		label: "Без организатора",
 		color: Keyboard.PRIMARY_COLOR,
 		payload: {
-			command: 'setNoOrganizer',
+			command: "setNoOrganizer",
 		},
 	});

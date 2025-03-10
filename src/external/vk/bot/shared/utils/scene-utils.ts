@@ -4,13 +4,13 @@ import { Context, MessageContext } from "vk-io";
 export type SceneStepWithDependencies<
 	T extends Context = MessageContext,
 	S extends Record<string, any> = {},
-	D extends Record<string, any> = {}
+	D extends Record<string, any> = {},
 > = StepSceneHandler<T & { dependencies: D }, S>;
 
 export function createScene<
 	T extends Context = MessageContext,
 	S extends Record<string, any> = {},
-	D extends Record<string, any> = {}
+	D extends Record<string, any> = {},
 >(
 	slug: string,
 	steps: SceneStepWithDependencies<T, S, D>[],

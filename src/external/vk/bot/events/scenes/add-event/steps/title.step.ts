@@ -1,16 +1,16 @@
-import { Keyboard, MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
+import { Keyboard, MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import {
 	AddEventSceneDependencies,
 	AddEventSceneState,
-} from '../add-event.scene.js';
+} from "../add-event.scene.js";
 
 export const titleStep: SceneStepWithDependencies<
 	MessageContext,
@@ -21,7 +21,7 @@ export const titleStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered title scene step`,
-			'info'
+			"info"
 		);
 		return await context.send(
 			`
@@ -43,17 +43,17 @@ export const titleStep: SceneStepWithDependencies<
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
 		switch (context.messagePayload.command) {
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.previous();
 			}
-			case 'leave': {
+			case "leave": {
 				return await context.scene.leave();
 			}
 			default: {
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -68,7 +68,7 @@ export const titleStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> too long (>255) title`,
-				'info'
+				"info"
 			);
 			return await context.reply(`Слишком длинное название для события`);
 		}
@@ -76,6 +76,6 @@ export const titleStep: SceneStepWithDependencies<
 		context.scene.state.event.title = parsedTitle;
 	}
 
-	logStep(context, `User ${context.senderId} -> passed title step`, 'info');
+	logStep(context, `User ${context.senderId} -> passed title step`, "info");
 	return await context.scene.step.next();
 };

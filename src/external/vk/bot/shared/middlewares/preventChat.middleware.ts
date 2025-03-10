@@ -1,4 +1,4 @@
-import { MessageContext } from 'vk-io';
+import { MessageContext } from "vk-io";
 
 export async function preventChatMiddleware(
 	context: MessageContext,

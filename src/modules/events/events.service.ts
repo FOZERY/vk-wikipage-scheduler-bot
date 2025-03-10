@@ -35,9 +35,8 @@ export class EventsService {
 			`EventsService -> findEventsByTitleOrDate with searchString '${searchString}' executed`
 		);
 
-		const events = await this.eventsRepository.findEventsByTitleOrDate(
-			searchString
-		);
+		const events =
+			await this.eventsRepository.findEventsByTitleOrDate(searchString);
 
 		return ok(events);
 	}

@@ -1,18 +1,18 @@
-import { MessageContext } from 'vk-io';
-import { onlyTextOrKeyboardAllowMessage } from '../../../../shared/messages/onlyTextOrKeyboardAllow.message.js';
-import { convertRussianDateStringToDefaultFormat } from '../../../../shared/utils/date-utils.js';
+import { MessageContext } from "vk-io";
+import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
+import { convertRussianDateStringToDefaultFormat } from "../../../../shared/utils/date-utils.js";
 import {
 	attachTextButtonToKeyboard,
 	previousButtonOptions,
-} from '../../../../shared/utils/keyboard-utils.js';
-import { logStep } from '../../../../shared/utils/logger-messages.js';
-import { SceneStepWithDependencies } from '../../../../shared/utils/scene-utils.js';
-import { getDateKeyboard } from '../../../keyboards/date.keyboard.js';
+} from "../../../../shared/utils/keyboard-utils.js";
+import { logStep } from "../../../../shared/utils/logger-messages.js";
+import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import { getDateKeyboard } from "../../../keyboards/date.keyboard.js";
 import {
 	UpdateEventSceneDependencies,
 	UpdateEventSceneState,
 	UpdateEventSceneStepNumber,
-} from '../update-event.scene.js';
+} from "../update-event.scene.js";
 
 export const updateDateStep: SceneStepWithDependencies<
 	MessageContext,
@@ -23,7 +23,7 @@ export const updateDateStep: SceneStepWithDependencies<
 		logStep(
 			context,
 			`User ${context.senderId} -> entered update-date step`,
-			'info'
+			"info"
 		);
 
 		return await context.send(
@@ -43,12 +43,12 @@ export const updateDateStep: SceneStepWithDependencies<
 	if (context.hasMessagePayload) {
 		// если ввели с клавиатуры
 		switch (context.messagePayload.command) {
-			case 'previous': {
+			case "previous": {
 				return await context.scene.step.go(
 					UpdateEventSceneStepNumber.SelectFieldOrConfirm
 				);
 			}
-			case 'setDate': {
+			case "setDate": {
 				const payload = context.messagePayload;
 				context.scene.state.event.date = payload.date;
 				break;
@@ -57,7 +57,7 @@ export const updateDateStep: SceneStepWithDependencies<
 				logStep(
 					context,
 					`Unknown command: ${context.messagePayload.command}`,
-					'error'
+					"error"
 				);
 				throw new Error(
 					`Unknown command: ${context.messagePayload.command}`
@@ -72,10 +72,10 @@ export const updateDateStep: SceneStepWithDependencies<
 			logStep(
 				context,
 				`User ${context.senderId} -> entered invalid date`,
-				'warn',
+				"warn",
 				result.error
 			);
-			return await context.reply('Неправильный формат даты.');
+			return await context.reply("Неправильный формат даты.");
 		}
 
 		context.scene.state.event.date = result.value;
@@ -84,7 +84,7 @@ export const updateDateStep: SceneStepWithDependencies<
 	logStep(
 		context,
 		`User ${context.senderId} -> passed update-date step`,
-		'info'
+		"info"
 	);
 	return await context.scene.step.go(
 		UpdateEventSceneStepNumber.SelectFieldOrConfirm
