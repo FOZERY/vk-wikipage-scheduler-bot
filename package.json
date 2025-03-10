@@ -8,7 +8,7 @@
     "prebuild": "pnpm clean",
     "build": "tsc --project ./tsconfig.build.json",
     "start:dev": "node --env-file=./env/.env.development ./dist/index.js",
-    "start:prod": "node --env-file=./env/.env.production ./dist/index.js",
+    "start:prod": "node ./dist/index.js",
     "tsx:dev": "tsx --env-file=./env/.env.development ./src/index.ts",
     "watch:dev": "tsx --env-file=./env/.env.development --watch ./src/index.ts",
     "inspect": "node --inspect --env-file=./env/.env.development ./dist/index.js",
