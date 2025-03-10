@@ -6,8 +6,8 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-	public input: any;
 	public expected: any;
+	public input: any;
 
 	constructor(message: string, input: any, expected: any) {
 		super(message);
