@@ -30,7 +30,7 @@ export class ScheduleService {
 				"DD.MM.YYYY"
 			)}\n| ${timeRangeToStringOutput(event.timeRange)}\n| ${
 				event.title
-			}\n| ${event.place}\n| ${event.organizer ?? "Не указано"}\n`;
+			}\n| ${event.place}\n| ${event.organizer ?? "-"}\n`;
 		}, "");
 		newSchedule = `{|\n${newSchedule}|}`;
 		return newSchedule;

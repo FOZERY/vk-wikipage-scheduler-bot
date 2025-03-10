@@ -46,7 +46,7 @@ export function parseTimeString(input: string) {
 
 export function timeRangeToStringOutput(timeRange: ViewTimeRange): string {
 	if (!timeRange) {
-		return "Не указано";
+		return "-";
 	}
 
 	if (!timeRange.endTime) {
