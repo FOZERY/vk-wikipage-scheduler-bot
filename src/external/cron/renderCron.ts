@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import { EventsService } from "../../modules/events/events.service.js";
+import type { EventsService } from "../../modules/events/events.service.js";
 import { logger } from "../logger/pino.js";
 
 const clogger = logger.child({

@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { Keyboard, MessageContext } from "vk-io";
+import { Keyboard, type MessageContext } from "vk-io";
 import { DatabaseConstraintError } from "../../../../../../../shared/errors.js";
 import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
@@ -8,14 +8,11 @@ import {
 	previousButtonOptions,
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
-import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { timeRangeToStringOutput } from "../../../../shared/utils/time-utils.js";
 import { getConfirmKeyboard } from "../../../keyboards/confirm.keyboard.js";
 import { EventSceneEnum } from "../../../types/events.types.js";
-import {
-	AddEventSceneDependencies,
-	AddEventSceneState,
-} from "../add-event.scene.js";
+import type { AddEventSceneDependencies, AddEventSceneState } from "../add-event.scene.js";
 
 export const confirmStep: SceneStepWithDependencies<
 	MessageContext,
@@ -23,15 +20,9 @@ export const confirmStep: SceneStepWithDependencies<
 	AddEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
-		logStep(
-			context,
-			`User ${context.senderId} -> entered confirm scene step`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> entered confirm scene step`, "info");
 
-		const dateFormattedString = dayjs(context.scene.state.event.date)
-			.tz()
-			.format("DD.MM.YYYY");
+		const dateFormattedString = dayjs(context.scene.state.event.date).tz().format("DD.MM.YYYY");
 
 		return await context.send(
 			`	
@@ -79,14 +70,8 @@ export const confirmStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(
-					context,
-					`Unknown command: ${context.messagePayload.command}`,
-					"error"
-				);
-				throw new Error(
-					`Unknown command: ${context.messagePayload.command}`
-				);
+				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");
+				throw new Error(`Unknown command: ${context.messagePayload.command}`);
 			}
 		}
 	} else {

@@ -6,10 +6,10 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-	public expected: any;
-	public input: any;
+	public expected: unknown;
+	public input: unknown;
 
-	constructor(message: string, input: any, expected: any) {
+	constructor(message: string, input: unknown, expected: unknown) {
 		super(message);
 		this.input = input;
 		this.expected = expected;

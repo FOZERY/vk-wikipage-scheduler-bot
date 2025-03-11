@@ -1,11 +1,4 @@
-import {
-	customType,
-	date,
-	integer,
-	pgTable,
-	text,
-	timestamp,
-} from "drizzle-orm/pg-core";
+import { customType, date, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export type TimeRange = {
 	startTime: {
@@ -28,11 +21,11 @@ const timeRange = customType<{
 	},
 	toDriver(range: TimeRange): string {
 		const startTime = range.startTime.strict
-			? "[" + range.startTime.value
-			: "(" + range.startTime.value;
+			? `[${range.startTime.value}`
+			: `(${range.startTime.value}`;
 		const endTime = range.endTime.strict
-			? range.endTime.value + "]"
-			: range.endTime.value + ")";
+			? `${range.endTime.value}]`
+			: `${range.endTime.value})`;
 		return `${startTime}, ${endTime}`;
 	},
 	fromDriver(value: string): TimeRange {

@@ -1,15 +1,12 @@
-import { Keyboard, MessageContext } from "vk-io";
+import { Keyboard, type MessageContext } from "vk-io";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
-import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { selectEventKeyboard } from "../../../keyboards/select-event.keyboard.js";
-import {
-	DeleteEventSceneDependencies,
-	DeleteEventSceneState,
-} from "../delete-event.scene.js";
+import type { DeleteEventSceneDependencies, DeleteEventSceneState } from "../delete-event.scene.js";
 
 export const findEventStep: SceneStepWithDependencies<
 	MessageContext,
@@ -17,26 +14,20 @@ export const findEventStep: SceneStepWithDependencies<
 	DeleteEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
-		logStep(
-			context,
-			`User ${context.senderId} -> entered find-event step`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> entered find-event step`, "info");
 
 		return await context.send(
 			`
 Используй сообщение для поиска события, которое хочешь удалить (искать можно по дате, названию организатору).`,
 			{
-				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [
-					leaveButtonOptions,
-				]),
+				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [leaveButtonOptions]),
 			}
 		);
 	}
 
 	if (!context.text) {
 		return await context.reply(
-			`Разрешено вводить только текст, либо пользоваться клавиатурой.`
+			"Разрешено вводить только текст, либо пользоваться клавиатурой."
 		);
 	}
 
@@ -51,14 +42,8 @@ export const findEventStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(
-					context,
-					`Unknown command: ${context.messagePayload.command}`,
-					"error"
-				);
-				throw new Error(
-					`Unknown command: ${context.messagePayload.command}`
-				);
+				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");
+				throw new Error(`Unknown command: ${context.messagePayload.command}`);
 			}
 		}
 	} else {
@@ -66,9 +51,7 @@ export const findEventStep: SceneStepWithDependencies<
 		const trimmedText = context.text.trim();
 
 		const result =
-			await context.dependencies.eventsService.findEventsByTitleOrDate(
-				trimmedText
-			);
+			await context.dependencies.eventsService.findEventsByTitleOrDate(trimmedText);
 		if (result.isErr()) {
 			logStep(
 				context,
@@ -80,29 +63,17 @@ export const findEventStep: SceneStepWithDependencies<
 		}
 
 		if (result.value.length === 0) {
-			logStep(
-				context,
-				`User ${context.senderId} -> events not found`,
-				"info"
-			);
+			logStep(context, `User ${context.senderId} -> events not found`, "info");
 			return await context.send("События не найдены.");
 		}
 
-		return await context.send(
-			"Выбери событие для удаления, либо продолжи поиск.",
-			{
-				keyboard: attachTextButtonToKeyboard(
-					selectEventKeyboard(result.value),
-					[leaveButtonOptions]
-				),
-			}
-		);
+		return await context.send("Выбери событие для удаления, либо продолжи поиск.", {
+			keyboard: attachTextButtonToKeyboard(selectEventKeyboard(result.value), [
+				leaveButtonOptions,
+			]),
+		});
 	}
 
-	logStep(
-		context,
-		`User ${context.senderId} -> passed find-event step`,
-		"info"
-	);
+	logStep(context, `User ${context.senderId} -> passed find-event step`, "info");
 	return await context.scene.step.next();
 };

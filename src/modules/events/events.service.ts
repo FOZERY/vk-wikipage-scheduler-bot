@@ -1,23 +1,18 @@
 import dayjs from "dayjs";
-import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { err, ok, Result } from "neverthrow";
-import { Logger } from "pino";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { Result, err, ok } from "neverthrow";
+import type { Logger } from "pino";
 import { logger } from "../../external/logger/pino.js";
-import { ScheduleService } from "../../external/vk/api/wiki/schedule/schedule-service.js";
-import {
-	DatabaseConstraintError,
-	DatabaseError,
-	ValidationError,
-	VKApiError,
-} from "../../shared/errors.js";
-import {
+import type { ScheduleService } from "../../external/vk/api/wiki/schedule/schedule-service.js";
+import { DatabaseConstraintError, ValidationError } from "../../shared/errors.js";
+import type {
 	CreateEventDTO,
 	FindCollisionsByDateTimePlaceDTO,
 	GetEventsByDateRangeDTO,
 	UpdateEventDTO,
 } from "./event.dto.js";
 import { EventEntity } from "./event.entity.js";
-import { EventsRepository } from "./events.repository.js";
+import type { EventsRepository } from "./events.repository.js";
 
 export class EventsService {
 	private logger: Logger;
@@ -35,16 +30,13 @@ export class EventsService {
 			`EventsService -> findEventsByTitleOrDate with searchString '${searchString}' executed`
 		);
 
-		const events =
-			await this.eventsRepository.findEventsByTitleOrDate(searchString);
+		const events = await this.eventsRepository.findEventsByTitleOrDate(searchString);
 
 		return ok(events);
 	}
 
 	public async deleteEventById(id: number) {
-		this.logger.info(
-			`EventsService -> deleteEventById with id '${id}' executed`
-		);
+		this.logger.info(`EventsService -> deleteEventById with id '${id}' executed`);
 
 		await this.db.transaction(async (tx) => {
 			await this.eventsRepository.delete(id, tx);
@@ -94,9 +86,7 @@ export class EventsService {
 		return ok(events);
 	}
 
-	public async findCollisionsInSchedule(
-		dto: FindCollisionsByDateTimePlaceDTO
-	) {
+	public async findCollisionsInSchedule(dto: FindCollisionsByDateTimePlaceDTO) {
 		// Validate date
 		if (!dayjs(dto.date, "YYYY-MM-DD", true).isValid()) {
 			this.logger.warn(
@@ -113,10 +103,7 @@ export class EventsService {
 		}
 
 		// Validate startTime if provided
-		if (
-			dto.timeRange &&
-			!dayjs(dto.timeRange.startTime, "HH:mm:ss", true).isValid()
-		) {
+		if (dto.timeRange && !dayjs(dto.timeRange.startTime, "HH:mm:ss", true).isValid()) {
 			this.logger.warn(
 				{ dto },
 				`EventsService -> findCollisionsInSchedule Validation error: startTime ${dto.timeRange.startTime} must be in the format HH:mm:ss`
@@ -131,11 +118,7 @@ export class EventsService {
 		}
 
 		// Validate endTime if provided
-		if (
-			dto.timeRange &&
-			dto.timeRange.endTime &&
-			!dayjs(dto.timeRange.endTime, "HH:mm:ss", true).isValid()
-		) {
+		if (dto.timeRange?.endTime && !dayjs(dto.timeRange.endTime, "HH:mm:ss", true).isValid()) {
 			this.logger.warn(
 				{ dto },
 				`EventsService -> findCollisionsInSchedule Validation error: endTime ${dto.timeRange.endTime} must be in the format HH:mm:ss`
@@ -151,8 +134,7 @@ export class EventsService {
 
 		// If both startTime and endTime are provided, ensure startTime is before endTime
 		if (
-			dto.timeRange &&
-			dto.timeRange.endTime &&
+			dto.timeRange?.endTime &&
 			dayjs(dto.timeRange.startTime).isAfter(dayjs(dto.timeRange.endTime))
 		) {
 			this.logger.warn(
@@ -207,10 +189,7 @@ export class EventsService {
 						throw entityResult.error;
 					}
 
-					const createResult = await this.eventsRepository.create(
-						entityResult.value,
-						tx
-					);
+					const createResult = await this.eventsRepository.create(entityResult.value, tx);
 
 					if (createResult.isErr()) {
 						throw createResult.error;
@@ -223,10 +202,7 @@ export class EventsService {
 
 			return ok(undefined);
 		} catch (error) {
-			if (
-				error instanceof DatabaseConstraintError ||
-				error instanceof ValidationError
-			) {
+			if (error instanceof DatabaseConstraintError || error instanceof ValidationError) {
 				return err(error);
 			}
 
@@ -236,12 +212,7 @@ export class EventsService {
 
 	public async update(
 		dto: UpdateEventDTO
-	): Promise<
-		Result<
-			void,
-			DatabaseConstraintError | ValidationError | "Event not found"
-		>
-	> {
+	): Promise<Result<void, DatabaseConstraintError | ValidationError | "Event not found">> {
 		const eventOrNull = await this.eventsRepository.getById(dto.id);
 
 		if (!eventOrNull) {
@@ -265,10 +236,7 @@ export class EventsService {
 						throw updatePropsResult.error;
 					}
 
-					const updateResult = await this.eventsRepository.update(
-						eventOrNull,
-						tx
-					);
+					const updateResult = await this.eventsRepository.update(eventOrNull, tx);
 
 					if (updateResult.isErr()) {
 						throw updateResult.error;
@@ -283,10 +251,7 @@ export class EventsService {
 
 			return ok(undefined);
 		} catch (error) {
-			if (
-				error instanceof DatabaseConstraintError ||
-				error instanceof ValidationError
-			) {
+			if (error instanceof DatabaseConstraintError || error instanceof ValidationError) {
 				return err(error);
 			}
 

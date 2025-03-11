@@ -1,4 +1,4 @@
-import { MessageContext } from "vk-io";
+import type { MessageContext } from "vk-io";
 import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import { convertRussianDateStringToDefaultFormat } from "../../../../shared/utils/date-utils.js";
 import {
@@ -6,12 +6,9 @@ import {
 	leaveButtonOptions,
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
-import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { getDateKeyboard } from "../../../keyboards/date.keyboard.js";
-import {
-	AddEventSceneDependencies,
-	AddEventSceneState,
-} from "../add-event.scene.js";
+import type { AddEventSceneDependencies, AddEventSceneState } from "../add-event.scene.js";
 
 export const dateStep: SceneStepWithDependencies<
 	MessageContext,
@@ -19,20 +16,13 @@ export const dateStep: SceneStepWithDependencies<
 	AddEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
-		logStep(
-			context,
-			`User ${context.senderId} -> entered date scene step`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> entered date scene step`, "info");
 		return await context.send(
 			`
 Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
 			`,
 			{
-				keyboard: attachTextButtonToKeyboard(
-					getDateKeyboard(),
-					leaveButtonOptions
-				),
+				keyboard: attachTextButtonToKeyboard(getDateKeyboard(), leaveButtonOptions),
 			}
 		);
 	}
@@ -52,14 +42,8 @@ export const dateStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(
-					context,
-					`Unknown command: ${context.messagePayload.command}`,
-					"error"
-				);
-				throw new Error(
-					`Unknown command: ${context.messagePayload.command}`
-				);
+				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");
+				throw new Error(`Unknown command: ${context.messagePayload.command}`);
 			}
 		}
 	} else {

@@ -1,26 +1,24 @@
+import assert from "node:assert";
 import dayjs from "dayjs";
-import { MessageContext } from "vk-io";
-import {
-	DatabaseConstraintError,
-	ValidationError,
-} from "../../../../../../../shared/errors.js";
+import type { MessageContext } from "vk-io";
+import { DatabaseConstraintError, ValidationError } from "../../../../../../../shared/errors.js";
 import {
 	attachTextButtonToKeyboard,
 	leaveButtonOptions,
 	previousButtonOptions,
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
-import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { timeRangeToStringOutput } from "../../../../shared/utils/time-utils.js";
 import {
-	getSelectFieldOrConfirmKeyboard,
 	SelectField,
 	SelectFieldKeyboardCommand,
-	SelectFieldKeyboardPayload,
+	type SelectFieldKeyboardPayload,
+	getSelectFieldOrConfirmKeyboard,
 } from "../../../keyboards/select-field.keyboard.js";
 import {
-	UpdateEventSceneDependencies,
-	UpdateEventSceneState,
+	type UpdateEventSceneDependencies,
+	type UpdateEventSceneState,
 	UpdateEventSceneStepNumber,
 } from "../update-event.scene.js";
 
@@ -30,18 +28,12 @@ export const selectFieldStep: SceneStepWithDependencies<
 	UpdateEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
-		logStep(
-			context,
-			`User ${context.senderId} -> entered select-field step`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> entered select-field step`, "info");
 
 		return await context.send(
 			`
 Вы выбрали следующее событие:
-Дата: ${dayjs(context.scene.state.event.date, "YYYY-MM-DD").format(
-				"DD.MM.YYYY"
-			)}	
+Дата: ${dayjs(context.scene.state.event.date, "YYYY-MM-DD").format("DD.MM.YYYY")}	
 Время: ${timeRangeToStringOutput(context.scene.state.event.timeRange)}
 Место: ${context.scene.state.event.place}
 Название: ${context.scene.state.event.title}
@@ -50,17 +42,17 @@ export const selectFieldStep: SceneStepWithDependencies<
 Выберите, что хочешь изменить.	
 `,
 			{
-				keyboard: attachTextButtonToKeyboard(
-					getSelectFieldOrConfirmKeyboard(),
-					[previousButtonOptions, leaveButtonOptions]
-				),
+				keyboard: attachTextButtonToKeyboard(getSelectFieldOrConfirmKeyboard(), [
+					previousButtonOptions,
+					leaveButtonOptions,
+				]),
 			}
 		);
 	}
 
 	if (!context.text) {
 		return await context.reply(
-			`Разрешено вводить только текст, либо пользоваться клавиатурой.`
+			"Разрешено вводить только текст, либо пользоваться клавиатурой."
 		);
 	}
 
@@ -75,28 +67,19 @@ export const selectFieldStep: SceneStepWithDependencies<
 				return await context.scene.step.previous();
 			}
 			case SelectFieldKeyboardCommand.SelectField: {
-				const payload =
-					context.messagePayload as SelectFieldKeyboardPayload;
+				const payload = context.messagePayload as SelectFieldKeyboardPayload;
 				switch (payload.field) {
 					case SelectField.Date: {
-						return await context.scene.step.go(
-							UpdateEventSceneStepNumber.UpdateDate
-						);
+						return await context.scene.step.go(UpdateEventSceneStepNumber.UpdateDate);
 					}
 					case SelectField.Time: {
-						return await context.scene.step.go(
-							UpdateEventSceneStepNumber.UpdateTime
-						);
+						return await context.scene.step.go(UpdateEventSceneStepNumber.UpdateTime);
 					}
 					case SelectField.Place: {
-						return await context.scene.step.go(
-							UpdateEventSceneStepNumber.UpdatePlace
-						);
+						return await context.scene.step.go(UpdateEventSceneStepNumber.UpdatePlace);
 					}
 					case SelectField.Title: {
-						return await context.scene.step.go(
-							UpdateEventSceneStepNumber.UpdateTitle
-						);
+						return await context.scene.step.go(UpdateEventSceneStepNumber.UpdateTitle);
 					}
 					case SelectField.Organizer: {
 						return await context.scene.step.go(
@@ -109,8 +92,12 @@ export const selectFieldStep: SceneStepWithDependencies<
 				}
 			}
 			case SelectFieldKeyboardCommand.Confirm: {
+				assert(
+					typeof context.scene.state.event.id === "number",
+					"Event ID must be defined"
+				);
 				const result = await context.dependencies.eventsService.update({
-					id: context.scene.state.event.id!,
+					id: context.scene.state.event.id,
 					...context.scene.state.event,
 					lastUpdaterId: context.senderId,
 				});
@@ -152,11 +139,7 @@ export const selectFieldStep: SceneStepWithDependencies<
 
 				await context.send("Событие успешно обновлено.");
 
-				logStep(
-					context,
-					`User ${context.senderId} -> passed select-field step`,
-					"info"
-				);
+				logStep(context, `User ${context.senderId} -> passed select-field step`, "info");
 				return await context.scene.leave();
 			}
 			default: {
@@ -165,12 +148,10 @@ export const selectFieldStep: SceneStepWithDependencies<
 					`User ${context.senderId} -> unknown command - ${context.messagePayload.command}`,
 					"error"
 				);
-				throw new Error(
-					`Unknown command - ${context.messagePayload.command}`
-				);
+				throw new Error(`Unknown command - ${context.messagePayload.command}`);
 			}
 		}
 	} else {
-		return await context.reply(`Воспользуйся клавиатурой.`);
+		return await context.reply("Воспользуйся клавиатурой.");
 	}
 };

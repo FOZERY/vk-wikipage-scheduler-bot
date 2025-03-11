@@ -1,5 +1,5 @@
-import { Level } from "pino";
-import { Context } from "vk-io";
+import type { Level } from "pino";
+import type { Context } from "vk-io";
 
 export function getContextPartForLogging(context: Context) {
 	return {
@@ -15,12 +15,7 @@ export function getContextPartForLogging(context: Context) {
 	};
 }
 
-export function logStep(
-	context: Context,
-	message: string,
-	level: Level,
-	error?: unknown
-) {
+export function logStep(context: Context, message: string, level: Level, error?: unknown) {
 	context.dependencies.logger[level](
 		{
 			error: error,
