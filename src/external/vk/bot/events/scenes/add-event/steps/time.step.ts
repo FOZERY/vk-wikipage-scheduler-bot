@@ -8,6 +8,7 @@ import {
 import { logStep } from "../../../../shared/utils/logger-messages.js";
 import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { parseTimeString } from "../../../../shared/utils/time-utils.js";
+import { getTimeKeyboard } from "../../../keyboards/time.keyboard.js";
 import type { AddEventSceneDependencies, AddEventSceneState } from "../add-event.scene.js";
 
 export const timeStep: SceneStepWithDependencies<
@@ -24,10 +25,14 @@ export const timeStep: SceneStepWithDependencies<
 Либо выбери один из вариантов на клавиатуре.
 `,
 			{
-				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [
-					previousButtonOptions,
-					leaveButtonOptions,
-				]),
+				keyboard: attachTextButtonToKeyboard(
+					Keyboard.builder().textButton({
+						label: "Без времени",
+						color: Keyboard.PRIMARY_COLOR,
+						payload: { command: "setTime", timeRange: null },
+					}),
+					[previousButtonOptions, leaveButtonOptions]
+				),
 			}
 		);
 	}
@@ -43,6 +48,10 @@ export const timeStep: SceneStepWithDependencies<
 			}
 			case "previous": {
 				return await context.scene.step.previous();
+			}
+			case "setTime": {
+				context.scene.state.event.timeRange = context.messagePayload.timeRange;
+				break;
 			}
 			default: {
 				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");

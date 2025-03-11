@@ -27,7 +27,14 @@ export const updateTimeStep: SceneStepWithDependencies<
  	
 Либо выбери один из вариантов на клавиатуре.`,
 			{
-				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [previousButtonOptions]),
+				keyboard: attachTextButtonToKeyboard(
+					Keyboard.builder().textButton({
+						label: "Без времени",
+						color: Keyboard.PRIMARY_COLOR,
+						payload: { command: "setTime", timeRange: null },
+					}),
+					[previousButtonOptions]
+				),
 			}
 		);
 	}
@@ -41,6 +48,10 @@ export const updateTimeStep: SceneStepWithDependencies<
 		switch (payload.command) {
 			case "previous": {
 				return await context.scene.step.go(UpdateEventSceneStepNumber.SelectFieldOrConfirm);
+			}
+			case "setTime": {
+				context.scene.state.event.timeRange = context.messagePayload.timeRange;
+				break;
 			}
 			default: {
 				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");
