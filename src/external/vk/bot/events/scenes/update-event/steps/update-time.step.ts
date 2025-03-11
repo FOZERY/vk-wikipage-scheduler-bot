@@ -1,4 +1,4 @@
-import type { MessageContext } from "vk-io";
+import { Keyboard, type MessageContext } from "vk-io";
 import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
@@ -7,7 +7,6 @@ import {
 import { logStep } from "../../../../shared/utils/logger-messages.js";
 import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { parseTimeString } from "../../../../shared/utils/time-utils.js";
-import { getTimeKeyboard } from "../../../keyboards/time.keyboard.js";
 import {
 	type UpdateEventSceneDependencies,
 	type UpdateEventSceneState,
@@ -24,14 +23,11 @@ export const updateTimeStep: SceneStepWithDependencies<
 
 		return await context.send(
 			`		
-Введи время в одном из форматов: 
-		
-1. ЧЧ:ММ - ЧЧ:ММ 
-2. ЧЧ:ММ
-				
+Введи время в формате ЧЧ:ММ - ЧЧ:ММ
+ 	
 Либо выбери один из вариантов на клавиатуре.`,
 			{
-				keyboard: attachTextButtonToKeyboard(getTimeKeyboard(), [previousButtonOptions]),
+				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [previousButtonOptions]),
 			}
 		);
 	}
@@ -45,10 +41,6 @@ export const updateTimeStep: SceneStepWithDependencies<
 		switch (payload.command) {
 			case "previous": {
 				return await context.scene.step.go(UpdateEventSceneStepNumber.SelectFieldOrConfirm);
-			}
-			case "setTime": {
-				context.scene.state.event.timeRange = payload.timeRange;
-				break;
 			}
 			default: {
 				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");

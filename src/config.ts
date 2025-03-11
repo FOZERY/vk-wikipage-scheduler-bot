@@ -12,7 +12,8 @@ const envSchema = z.object({
 	SUPABASE_API_KEY: z.string(),
 	LOGTAIL_TOKEN: z.string(),
 	LOGTAIL_URL: z.string().url(),
-	LOG_TO_LOGTAIL: z.boolean(),
+	LOG_TO_LOGTAIL: z.enum(["true", "false"]).transform((val) => val === "true"),
+	PRETTY_LOGS: z.enum(["true", "false"]).transform((val) => val === "true"),
 });
 
 export const ENV = envSchema.parse(process.env);
