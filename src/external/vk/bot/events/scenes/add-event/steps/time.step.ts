@@ -8,7 +8,6 @@ import {
 import { logStep } from "../../../../shared/utils/logger-messages.js";
 import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { parseTimeString } from "../../../../shared/utils/time-utils.js";
-import { getTimeKeyboard } from "../../../keyboards/time.keyboard.js";
 import type { AddEventSceneDependencies, AddEventSceneState } from "../add-event.scene.js";
 
 export const timeStep: SceneStepWithDependencies<
