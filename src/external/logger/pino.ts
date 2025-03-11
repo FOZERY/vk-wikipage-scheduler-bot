@@ -1,5 +1,15 @@
 import { pino, TransportTargetOptions } from "pino";
 
+function serializeError(error: Error) {
+	return {
+		message: error.message,
+		stack: error.stack,
+		name: error.name,
+		// Добавляем все дополнительные свойства, если они есть
+		...(error as any),
+	};
+}
+
 const targets: TransportTargetOptions[] = [];
 
 if (process.env.PRETTY_LOGS === "true") {
@@ -25,5 +35,21 @@ export const logger = pino({
 	level: process.env.LOG_LEVEL ?? "info",
 	transport: {
 		targets: targets,
+	},
+	serializers: {
+		err: (err: Error) => {
+			// Если err не является экземпляром Error, возвращаем как есть
+			if (!(err instanceof Error)) {
+				return err;
+			}
+			return serializeError(err);
+		},
+		error: (err: Error) => {
+			// Дублируем для поля error, так как оба варианта используются
+			if (!(err instanceof Error)) {
+				return err;
+			}
+			return serializeError(err);
+		},
 	},
 });

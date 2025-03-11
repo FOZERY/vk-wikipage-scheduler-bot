@@ -30,7 +30,7 @@ export const selectEventKeyboard = (events: EventEntity[]) => {
 					place: event.place,
 					timeRange: event.timeRange,
 					organizer: event.organizer,
-					lastUpdaterId: event.lastUpdaterId,
+					// lastUpdaterId: event.lastUpdaterId,
 				},
 			} as SelectEventKeyboardPayload,
 		});
