@@ -1,4 +1,5 @@
 import { Keyboard } from "vk-io";
+import { ENV } from "../../../../../config.js";
 
 export const mainMenuKeyboard = Keyboard.builder()
 	.textButton({
@@ -27,5 +28,5 @@ export const mainMenuKeyboard = Keyboard.builder()
 	.row()
 	.urlButton({
 		label: "Перейти к расписанию",
-		url: process.env.PAGE_URL!,
+		url: ENV.PAGE_URL,
 	});

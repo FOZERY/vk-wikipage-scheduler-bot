@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { MessageContext } from "vk-io";
+import type { MessageContext } from "vk-io";
 import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
@@ -7,13 +7,10 @@ import {
 	previousButtonOptions,
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
-import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { timeRangeToStringOutput } from "../../../../shared/utils/time-utils.js";
 import { getPlaceKeyboard } from "../../../keyboards/place.keyboard.js";
-import {
-	AddEventSceneDependencies,
-	AddEventSceneState,
-} from "../add-event.scene.js";
+import type { AddEventSceneDependencies, AddEventSceneState } from "../add-event.scene.js";
 
 export const organizerStep: SceneStepWithDependencies<
 	MessageContext,
@@ -21,11 +18,7 @@ export const organizerStep: SceneStepWithDependencies<
 	AddEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
-		logStep(
-			context,
-			`User ${context.senderId} -> entered place scene step`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> entered place scene step`, "info");
 		return await context.send(
 			`
 Введи название места события или выбери с клавиатуры.
@@ -57,14 +50,8 @@ export const organizerStep: SceneStepWithDependencies<
 				break;
 			}
 			default: {
-				logStep(
-					context,
-					`Unknown command: ${context.messagePayload.command}`,
-					"error"
-				);
-				throw new Error(
-					`Unknown command: ${context.messagePayload.command}`
-				);
+				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");
+				throw new Error(`Unknown command: ${context.messagePayload.command}`);
 			}
 		}
 	} else {
@@ -83,12 +70,11 @@ export const organizerStep: SceneStepWithDependencies<
 		context.scene.state.event.place = parsedText;
 	}
 
-	const result =
-		await context.dependencies.eventsService.findCollisionsInSchedule({
-			date: context.scene.state.event.date,
-			timeRange: context.scene.state.event.timeRange,
-			place: context.scene.state.event.place,
-		});
+	const result = await context.dependencies.eventsService.findCollisionsInSchedule({
+		date: context.scene.state.event.date,
+		timeRange: context.scene.state.event.timeRange,
+		place: context.scene.state.event.place,
+	});
 
 	if (result.isErr()) {
 		logStep(
@@ -101,11 +87,7 @@ export const organizerStep: SceneStepWithDependencies<
 	}
 
 	if (result.value.length > 0) {
-		logStep(
-			context,
-			`User ${context.senderId} -> place is already taken`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> place is already taken`, "info");
 		return await context.reply(
 			`
 Это место и время уже заняты событием "${result.value[0].title}"

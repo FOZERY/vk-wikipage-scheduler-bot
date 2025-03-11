@@ -1,4 +1,4 @@
-import { Nullable } from "../../../../../shared/types/common.types.js";
+import type { Nullable } from "../../../../../shared/types/common.types.js";
 
 export type ViewTimeRange = Nullable<{
 	startTime: string; // "HH:mm:ss"

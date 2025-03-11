@@ -1,16 +1,15 @@
-import { MessageContext } from "vk-io";
+import { Keyboard, type MessageContext } from "vk-io";
 import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
 	previousButtonOptions,
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
-import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { parseTimeString } from "../../../../shared/utils/time-utils.js";
-import { getTimeKeyboard } from "../../../keyboards/time.keyboard.js";
 import {
-	UpdateEventSceneDependencies,
-	UpdateEventSceneState,
+	type UpdateEventSceneDependencies,
+	type UpdateEventSceneState,
 	UpdateEventSceneStepNumber,
 } from "../update-event.scene.js";
 
@@ -20,24 +19,15 @@ export const updateTimeStep: SceneStepWithDependencies<
 	UpdateEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
-		logStep(
-			context,
-			`User ${context.senderId} -> entered update-time step`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> entered update-time step`, "info");
 
 		return await context.send(
 			`		
-Введи время в одном из форматов: 
-		
-1. ЧЧ:ММ - ЧЧ:ММ 
-2. ЧЧ:ММ
-				
+Введи время в формате ЧЧ:ММ - ЧЧ:ММ
+ 	
 Либо выбери один из вариантов на клавиатуре.`,
 			{
-				keyboard: attachTextButtonToKeyboard(getTimeKeyboard(), [
-					previousButtonOptions,
-				]),
+				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [previousButtonOptions]),
 			}
 		);
 	}
@@ -50,23 +40,11 @@ export const updateTimeStep: SceneStepWithDependencies<
 		const payload = context.messagePayload;
 		switch (payload.command) {
 			case "previous": {
-				return await context.scene.step.go(
-					UpdateEventSceneStepNumber.SelectFieldOrConfirm
-				);
-			}
-			case "setTime": {
-				context.scene.state.event.timeRange = payload.timeRange;
-				break;
+				return await context.scene.step.go(UpdateEventSceneStepNumber.SelectFieldOrConfirm);
 			}
 			default: {
-				logStep(
-					context,
-					`Unknown command: ${context.messagePayload.command}`,
-					"error"
-				);
-				throw new Error(
-					`Unknown command: ${context.messagePayload.command}`
-				);
+				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");
+				throw new Error(`Unknown command: ${context.messagePayload.command}`);
 			}
 		}
 	} else {
@@ -90,12 +68,6 @@ export const updateTimeStep: SceneStepWithDependencies<
 		};
 	}
 
-	logStep(
-		context,
-		`User ${context.senderId} -> passed update-time step`,
-		"info"
-	);
-	return await context.scene.step.go(
-		UpdateEventSceneStepNumber.SelectFieldOrConfirm
-	);
+	logStep(context, `User ${context.senderId} -> passed update-time step`, "info");
+	return await context.scene.step.go(UpdateEventSceneStepNumber.SelectFieldOrConfirm);
 };

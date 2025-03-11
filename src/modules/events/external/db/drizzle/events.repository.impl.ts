@@ -1,30 +1,21 @@
 import dayjs from "dayjs";
 import { and, asc, between, eq, gte, ilike, or, sql } from "drizzle-orm";
 import { PgTransaction } from "drizzle-orm/pg-core";
-import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import { err, ok, Result } from "neverthrow";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { type Result, err, ok } from "neverthrow";
 import postgres from "postgres";
-import { DrizzleTransctionType } from "../../../../../external/db/drizzle/index.js";
-import {
-	eventsTable,
-	TimeRange,
-} from "../../../../../external/db/drizzle/schema.js";
-import {
-	DatabaseConstraintError,
-	DatabaseError,
-} from "../../../../../shared/errors.js";
-import { Nullable } from "../../../../../shared/types/common.types.js";
-import { GetEventsByDateRangeDTO } from "../../../event.dto.js";
+import type { DrizzleTransctionType } from "../../../../../external/db/drizzle/index.js";
+import { type TimeRange, eventsTable } from "../../../../../external/db/drizzle/schema.js";
+import { DatabaseConstraintError, DatabaseError } from "../../../../../shared/errors.js";
+import type { Nullable } from "../../../../../shared/types/common.types.js";
+import type { GetEventsByDateRangeDTO } from "../../../event.dto.js";
 import { EventEntity } from "../../../event.entity.js";
-import { EventsRepository } from "../../../events.repository.js";
+import type { EventsRepository } from "../../../events.repository.js";
 
 export class EventsRepositoryImpl implements EventsRepository {
 	constructor(private readonly db: PostgresJsDatabase) {}
 
-	public async getById(
-		id: number,
-		tx?: unknown
-	): Promise<EventEntity | null> {
+	public async getById(id: number, tx?: unknown): Promise<EventEntity | null> {
 		if (tx && !(tx instanceof PgTransaction)) {
 			throw new Error("tx is not instanceof PgTransaction");
 		}
@@ -92,17 +83,14 @@ export class EventsRepositoryImpl implements EventsRepository {
 		}
 	}
 
-	async findEventsByTitleOrDate(
-		searchString: string,
-		tx?: unknown
-	): Promise<EventEntity[]> {
+	async findEventsByTitleOrDate(searchString: string, tx?: unknown): Promise<EventEntity[]> {
 		if (tx && !(tx instanceof PgTransaction)) {
 			throw new DatabaseError("tx is not instanceof PgTransaction");
 		}
 
 		const connection = (tx as DrizzleTransctionType) ?? this.db;
 
-		const ftsQuery = searchString.trim().replaceAll(" ", "+") + ":*";
+		const ftsQuery = `${searchString.trim().replaceAll(" ", "+")}:*`;
 
 		try {
 			const events = await connection
@@ -113,9 +101,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 						sql`fts @@ to_tsquery('russian', ${ftsQuery})`,
 						ilike(
 							sql<string>`to_char(${eventsTable.date}, 'YYYY-MM-DD')`,
-							`${dayjs(searchString, "DD.MM.YYYY").format(
-								"YYYY-MM-DD"
-							)}%`
+							`${dayjs(searchString, "DD.MM.YYYY").format("YYYY-MM-DD")}%`
 						)
 					)
 				)
@@ -174,11 +160,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 				.from(eventsTable)
 				.where(
 					month.endDate
-						? between(
-								eventsTable.date,
-								month.startDate,
-								month.endDate
-							)
+						? between(eventsTable.date, month.startDate, month.endDate)
 						: gte(eventsTable.date, month.startDate)
 				)
 				.orderBy(
@@ -245,12 +227,10 @@ export class EventsRepositoryImpl implements EventsRepository {
 		const timeRangeSql = dto.timeRange
 			? `(${dto.timeRange.startTime},${dto.timeRange.endTime})`
 			: undefined;
-		let whereConditions = and(
+		const whereConditions = and(
 			eq(eventsTable.date, dto.date),
 			ilike(eventsTable.place, `%${dto.place}%`),
-			dto.timeRange
-				? sql`${eventsTable.time_range} && ${timeRangeSql}::timerange`
-				: undefined
+			dto.timeRange ? sql`${eventsTable.time_range} && ${timeRangeSql}::timerange` : undefined
 		);
 
 		try {
@@ -296,10 +276,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 		}
 	}
 
-	async create(
-		event: EventEntity,
-		tx?: unknown
-	): Promise<Result<void, DatabaseConstraintError>> {
+	async create(event: EventEntity, tx?: unknown): Promise<Result<void, DatabaseConstraintError>> {
 		if (tx && !(tx instanceof PgTransaction)) {
 			throw new DatabaseError("tx is not instanceof PgTransaction");
 		}
@@ -334,7 +311,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					return err(
 						new DatabaseConstraintError(
 							"Overlapping time ranges",
-							error.constraint_name!,
+							error.constraint_name ?? "unknown constraint name",
 							error
 						)
 					);
@@ -389,7 +366,7 @@ export class EventsRepositoryImpl implements EventsRepository {
 					return err(
 						new DatabaseConstraintError(
 							"Overlapping time ranges",
-							error.constraint_name!,
+							error.constraint_name ?? "unknown constraint name",
 							error
 						)
 					);

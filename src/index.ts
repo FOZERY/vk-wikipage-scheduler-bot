@@ -1,6 +1,7 @@
 import "./shared/dayjs.init.js";
 
 import { setTimeout as sleep } from "node:timers/promises";
+import { ENV } from "./config.js";
 import { getScheduleCronJob } from "./external/cron/renderCron.js";
 import { logger } from "./external/logger/pino.js";
 import { VKExtend } from "./external/vk/bot/bot.js";
@@ -19,7 +20,7 @@ import { eventsService } from "./modules/events/index.js";
 const renderJob = getScheduleCronJob(eventsService);
 
 const vk = new VKExtend({
-	token: process.env.LONGPOLL_TOKEN!,
+	token: ENV.LONGPOLL_TOKEN,
 	preventOutbox: true,
 	preventChat: true,
 	hearEvents: ["message_new"],
@@ -37,17 +38,14 @@ const vk = new VKExtend({
 
 vk.addScenes([addEventScene, deleteEventScene, updateEventScene]);
 
-vk.hear(
-	[{ "messagePayload.command": "addEvent" }, { text: "/add" }],
-	async (context) => {
-		logger.info(
-			{ context: getContextPartForLogging(context) },
-			`User ${context.senderId} -> send "add_event" command`
-		);
+vk.hear([{ "messagePayload.command": "addEvent" }, { text: "/add" }], async (context) => {
+	logger.info(
+		{ context: getContextPartForLogging(context) },
+		`User ${context.senderId} -> send "add_event" command`
+	);
 
-		await addEventCommand(context);
-	}
-);
+	await addEventCommand(context);
+});
 vk.hear(
 	[{ "messagePayload.command": "updateEvent" }, { text: "/update" }],
 
@@ -59,22 +57,15 @@ vk.hear(
 		await updateEventCommand(context);
 	}
 );
+vk.hear([{ "messagePayload.command": "deleteEvent" }, { text: "/delete" }], async (context) => {
+	logger.info(
+		{ context: getContextPartForLogging(context) },
+		`User ${context.senderId} -> send "delete_event" command`
+	);
+	await deleteEventCommand(context);
+});
 vk.hear(
-	[{ "messagePayload.command": "deleteEvent" }, { text: "/delete" }],
-	async (context) => {
-		logger.info(
-			{ context: getContextPartForLogging(context) },
-			`User ${context.senderId} -> send "delete_event" command`
-		);
-		await deleteEventCommand(context);
-	}
-);
-vk.hear(
-	[
-		{ "messagePayload.command": "start" },
-		{ text: "/help" },
-		{ text: "/start" },
-	],
+	[{ "messagePayload.command": "start" }, { text: "/help" }, { text: "/start" }],
 	async (context) => {
 		logger.info(
 			{ context: getContextPartForLogging(context) },
@@ -127,7 +118,7 @@ process.on("unhandledRejection", async (error) => {
 });
 
 process.on("SIGINT", async () => {
-	logger.fatal(`SIGINT`);
+	logger.fatal("SIGINT");
 	await gracefulShutdown(false);
 });
 

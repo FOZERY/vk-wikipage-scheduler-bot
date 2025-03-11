@@ -1,4 +1,4 @@
-import { MessageContext } from "vk-io";
+import { Keyboard, type MessageContext } from "vk-io";
 import { onlyTextOrKeyboardAllowMessage } from "../../../../shared/messages/onlyTextOrKeyboardAllow.message.js";
 import {
 	attachTextButtonToKeyboard,
@@ -6,13 +6,9 @@ import {
 	previousButtonOptions,
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
-import { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
+import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
 import { parseTimeString } from "../../../../shared/utils/time-utils.js";
-import { getTimeKeyboard } from "../../../keyboards/time.keyboard.js";
-import {
-	AddEventSceneDependencies,
-	AddEventSceneState,
-} from "../add-event.scene.js";
+import type { AddEventSceneDependencies, AddEventSceneState } from "../add-event.scene.js";
 
 export const timeStep: SceneStepWithDependencies<
 	MessageContext,
@@ -20,22 +16,15 @@ export const timeStep: SceneStepWithDependencies<
 	AddEventSceneDependencies
 > = async (context) => {
 	if (context.scene.step.firstTime) {
-		logStep(
-			context,
-			`User ${context.senderId} -> entered time scene step`,
-			"info"
-		);
+		logStep(context, `User ${context.senderId} -> entered time scene step`, "info");
 		return await context.send(
 			`		
-Введи время в одном из форматов: 
-	
-1. ЧЧ:ММ - ЧЧ:ММ 
-2. ЧЧ:ММ
-			
+Введи время в формате ЧЧ:ММ - ЧЧ:ММ
+ 	
 Либо выбери один из вариантов на клавиатуре.
 `,
 			{
-				keyboard: attachTextButtonToKeyboard(getTimeKeyboard(), [
+				keyboard: attachTextButtonToKeyboard(Keyboard.builder(), [
 					previousButtonOptions,
 					leaveButtonOptions,
 				]),
@@ -55,20 +44,9 @@ export const timeStep: SceneStepWithDependencies<
 			case "previous": {
 				return await context.scene.step.previous();
 			}
-			case "setTime": {
-				context.scene.state.event.timeRange =
-					context.messagePayload.timeRange;
-				break;
-			}
 			default: {
-				logStep(
-					context,
-					`Unknown command: ${context.messagePayload.command}`,
-					"error"
-				);
-				throw new Error(
-					`Unknown command: ${context.messagePayload.command}`
-				);
+				logStep(context, `Unknown command: ${context.messagePayload.command}`, "error");
+				throw new Error(`Unknown command: ${context.messagePayload.command}`);
 			}
 		}
 	} else {

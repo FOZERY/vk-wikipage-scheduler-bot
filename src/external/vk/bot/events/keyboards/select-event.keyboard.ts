@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { Keyboard } from "vk-io";
-import { EventEntity } from "../../../../../modules/events/event.entity.js";
-import { ViewEvent } from "../../shared/types/common.types.js";
+import type { EventEntity } from "../../../../../modules/events/event.entity.js";
+import type { ViewEvent } from "../../shared/types/common.types.js";
 
 export type SelectEventKeyboardPayload = {
 	command: string;
@@ -11,12 +11,11 @@ export type SelectEventKeyboardPayload = {
 export const selectEventKeyboard = (events: EventEntity[]) => {
 	const keyboard = Keyboard.builder();
 
-	events = events.slice(0, 5);
-	events.forEach((event) => {
+	events.slice(0, 5).forEach((event) => {
 		let label = `${dayjs(event.date, "YYYY-MM-DD").format(
 			"DD.MM.YYYY"
 		)} - ${event.title}, ${event.place}`;
-		label = label.length > 40 ? label.slice(0, 37) + "..." : label;
+		label = label.length > 40 ? `${label.slice(0, 37)}...` : label;
 
 		keyboard.textButton({
 			label: label,

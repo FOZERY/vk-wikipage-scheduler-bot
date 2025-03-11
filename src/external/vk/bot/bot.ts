@@ -1,13 +1,13 @@
-import { AllowArray, HearConditions, HearManager } from "@vk-io/hear";
-import { IScene, Middleware, SceneManager } from "@vk-io/scenes";
+import { type AllowArray, type HearConditions, HearManager } from "@vk-io/hear";
+import { type IScene, type Middleware, SceneManager } from "@vk-io/scenes";
 import { SessionManager } from "@vk-io/session";
 import {
+	type Context,
+	type MessageContextSubType,
+	type MessageContextType,
 	VK as _VK,
-	Context,
-	MessageContextSubType,
-	MessageContextType,
 } from "vk-io";
-import { MessageContextWithScene } from "./shared/types/context.type.js";
+import type { MessageContextWithScene } from "./shared/types/context.type.js";
 
 type VKOptions = {
 	token: string;
@@ -17,10 +17,7 @@ type VKOptions = {
 	errorHandler?: VKErrorHandler;
 };
 
-type VKErrorHandler = (
-	error: unknown,
-	context?: Context
-) => Promise<void> | void;
+type VKErrorHandler = (error: unknown, context?: Context) => Promise<void> | void;
 
 export class VKExtend extends _VK {
 	private hearManager: HearManager<MessageContextWithScene>;
@@ -83,7 +80,7 @@ export class VKExtend extends _VK {
 		return this.sceneManager.hasScene(slug);
 	}
 
-	public hear<T = {}>(
+	public hear<T>(
 		hearConditions: HearConditions<MessageContextWithScene & T>,
 		handler: Middleware<MessageContextWithScene & T>
 	) {

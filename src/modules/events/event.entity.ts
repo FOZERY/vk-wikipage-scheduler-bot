@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
-import { err, ok, Result } from "neverthrow";
+import { type Result, err, ok } from "neverthrow";
 import { ValidationError } from "../../shared/errors.js";
-import { Nullable } from "../../shared/types/common.types.js";
+import type { Nullable } from "../../shared/types/common.types.js";
 
 export interface EventEntityProps {
 	id?: number;
@@ -55,13 +55,8 @@ export class EventEntity {
 		this._updatedAt = props.updatedAt;
 	}
 
-	public static create(
-		props: EventEntityProps
-	): Result<EventEntity, ValidationError> {
-		if (
-			props.timeRange &&
-			!dayjs(props.timeRange.startTime, "HH:mm:ss", true).isValid()
-		) {
+	public static create(props: EventEntityProps): Result<EventEntity, ValidationError> {
+		if (props.timeRange && !dayjs(props.timeRange.startTime, "HH:mm:ss", true).isValid()) {
 			return err(
 				new ValidationError(
 					"startTime must be in the format HH:mm:ss",
@@ -71,8 +66,7 @@ export class EventEntity {
 			);
 		}
 		if (
-			props.timeRange &&
-			props.timeRange.endTime &&
+			props.timeRange?.endTime &&
 			!dayjs(props.timeRange.endTime, "HH:mm:ss", true).isValid()
 		) {
 			return err(
@@ -84,11 +78,8 @@ export class EventEntity {
 			);
 		}
 		if (
-			props.timeRange &&
-			props.timeRange.endTime &&
-			dayjs(props.timeRange.startTime).isAfter(
-				dayjs(props.timeRange.endTime)
-			)
+			props.timeRange?.endTime &&
+			dayjs(props.timeRange.startTime).isAfter(dayjs(props.timeRange.endTime))
 		) {
 			return err(
 				new ValidationError(
@@ -104,20 +95,12 @@ export class EventEntity {
 
 		if (props.title.length > 255) {
 			return err(
-				new ValidationError(
-					"title must be less than 255 characters",
-					props.title,
-					"< 255"
-				)
+				new ValidationError("title must be less than 255 characters", props.title, "< 255")
 			);
 		}
 		if (props.place.length > 255) {
 			return err(
-				new ValidationError(
-					"place must be less than 255 characters",
-					props.place,
-					"< 255"
-				)
+				new ValidationError("place must be less than 255 characters", props.place, "< 255")
 			);
 		}
 		if (props.lastUpdaterId <= 0) {
@@ -203,11 +186,7 @@ export class EventEntity {
 	public setTitle(title: string): Result<void, ValidationError> {
 		if (title.length > 255) {
 			return err(
-				new ValidationError(
-					"title must be less than 255 characters",
-					title,
-					"< 255"
-				)
+				new ValidationError("title must be less than 255 characters", title, "< 255")
 			);
 		}
 		this._title = title;
@@ -217,11 +196,7 @@ export class EventEntity {
 	public setDate(date: string): Result<void, ValidationError> {
 		if (!dayjs(date, "YYYY-MM-DD", true).isValid()) {
 			return err(
-				new ValidationError(
-					"date must be in the format YYYY-MM-DD",
-					date,
-					"YYYY-MM-DD"
-				)
+				new ValidationError("date must be in the format YYYY-MM-DD", date, "YYYY-MM-DD")
 			);
 		}
 		this._date = date;
@@ -231,11 +206,7 @@ export class EventEntity {
 	public setPlace(place: string): Result<void, ValidationError> {
 		if (place.length > 255) {
 			return err(
-				new ValidationError(
-					"place must be less than 255 characters",
-					place,
-					"< 255"
-				)
+				new ValidationError("place must be less than 255 characters", place, "< 255")
 			);
 		}
 		this._place = place;
@@ -263,10 +234,7 @@ export class EventEntity {
 			);
 		}
 
-		if (
-			timeRange.endTime &&
-			!dayjs(timeRange.endTime, "HH:mm:ss", true).isValid()
-		) {
+		if (timeRange.endTime && !dayjs(timeRange.endTime, "HH:mm:ss", true).isValid()) {
 			return err(
 				new ValidationError(
 					"endTime must be in the format HH:mm:ss",
@@ -276,10 +244,7 @@ export class EventEntity {
 			);
 		}
 
-		if (
-			timeRange.endTime &&
-			dayjs(timeRange.startTime).isAfter(dayjs(timeRange.endTime))
-		) {
+		if (timeRange.endTime && dayjs(timeRange.startTime).isAfter(dayjs(timeRange.endTime))) {
 			return err(
 				new ValidationError(
 					"startTime must be before endTime",
@@ -306,9 +271,7 @@ export class EventEntity {
 		return ok(undefined);
 	}
 
-	public setOrganizer(
-		organizer: string | null
-	): Result<void, ValidationError> {
+	public setOrganizer(organizer: string | null): Result<void, ValidationError> {
 		if (organizer && organizer.length > 255) {
 			return err(
 				new ValidationError(
@@ -324,13 +287,7 @@ export class EventEntity {
 
 	public setLastUpdaterId(id: number): Result<void, ValidationError> {
 		if (id <= 0) {
-			return err(
-				new ValidationError(
-					"lastUpdaterId must be greater than 0",
-					id,
-					"> 0"
-				)
-			);
+			return err(new ValidationError("lastUpdaterId must be greater than 0", id, "> 0"));
 		}
 		this._lastUpdaterId = id;
 		return ok(undefined);
