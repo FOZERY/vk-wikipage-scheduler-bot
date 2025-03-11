@@ -1,9 +1,6 @@
-import { MessageContext } from "vk-io";
+import type { MessageContext } from "vk-io";
 
-export async function preventChatMiddleware(
-	context: MessageContext,
-	next: () => Promise<unknown>
-) {
+export async function preventChatMiddleware(context: MessageContext, next: () => Promise<unknown>) {
 	if (context.isChat) {
 		return;
 	}

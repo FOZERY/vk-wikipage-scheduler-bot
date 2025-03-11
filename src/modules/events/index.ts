@@ -10,8 +10,4 @@ const scheduleRenderer = new ScheduleService({
 	pageId: Number(process.env.PAGE_ID),
 });
 
-export const eventsService = new EventsService(
-	scheduleRenderer,
-	eventsRepository,
-	db
-);
+export const eventsService = new EventsService(scheduleRenderer, eventsRepository, db);

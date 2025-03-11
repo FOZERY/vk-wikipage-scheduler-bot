@@ -1,11 +1,10 @@
-import { pino, TransportTargetOptions } from "pino";
+import { type TransportTargetOptions, pino } from "pino";
 
 function serializeError(error: Error) {
 	return {
 		message: error.message,
 		stack: error.stack,
 		name: error.name,
-		// Добавляем все дополнительные свойства, если они есть
 		...(error as any),
 	};
 }

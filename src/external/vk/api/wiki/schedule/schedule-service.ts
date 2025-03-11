@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { EventEntity } from "../../../../../modules/events/event.entity.js";
+import type { EventEntity } from "../../../../../modules/events/event.entity.js";
 import { timeRangeToStringOutput } from "../../../bot/shared/utils/time-utils.js";
 import { vkUserApi } from "../../../vk-user-api.js";
 

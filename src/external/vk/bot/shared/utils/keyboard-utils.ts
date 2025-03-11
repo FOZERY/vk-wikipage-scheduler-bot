@@ -1,4 +1,4 @@
-import { IKeyboardTextButtonOptions, Keyboard, KeyboardBuilder } from "vk-io";
+import { type IKeyboardTextButtonOptions, Keyboard, type KeyboardBuilder } from "vk-io";
 
 export enum NavigationButtonsCommand {
 	Previous = "previous",
@@ -6,7 +6,7 @@ export enum NavigationButtonsCommand {
 }
 
 export const previousButtonOptions: IKeyboardTextButtonOptions = {
-	label: `Назад`,
+	label: "Назад",
 	color: Keyboard.NEGATIVE_COLOR,
 	payload: {
 		command: NavigationButtonsCommand.Previous,
@@ -14,7 +14,7 @@ export const previousButtonOptions: IKeyboardTextButtonOptions = {
 };
 
 export const leaveButtonOptions: IKeyboardTextButtonOptions = {
-	label: `Отмена`,
+	label: "Отмена",
 	color: Keyboard.NEGATIVE_COLOR,
 	payload: {
 		command: NavigationButtonsCommand.Leave,
@@ -26,9 +26,7 @@ export function attachTextButtonToKeyboard(
 	buttonOptions: IKeyboardTextButtonOptions[] | IKeyboardTextButtonOptions
 ) {
 	if (Array.isArray(buttonOptions)) {
-		buttonOptions.forEach((buttonOption) =>
-			keyboard.row().textButton(buttonOption)
-		);
+		buttonOptions.forEach((buttonOption) => keyboard.row().textButton(buttonOption));
 	} else {
 		keyboard.row().textButton(buttonOptions);
 	}

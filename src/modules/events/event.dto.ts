@@ -1,4 +1,4 @@
-import { Nullable } from "../../shared/types/common.types.js";
+import type { Nullable } from "../../shared/types/common.types.js";
 
 export interface FindCollisionsByDateTimePlaceDTO {
 	date: string;
