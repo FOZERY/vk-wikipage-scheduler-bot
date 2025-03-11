@@ -1,4 +1,4 @@
-# bot-vk-node-ts
+# vk-wikipage-scheduler-bot
 
 ## Описание
 
