@@ -45,6 +45,14 @@ export const findEventStep: SceneStepWithDependencies<
 			}
 			case "selectEvent": {
 				const { event } = context.messagePayload as SelectEventKeyboardPayload;
+				logStep(
+					context,
+					`User ${context.senderId} -> selected event`,
+					{
+						event,
+					},
+					"info"
+				);
 				context.scene.state.event = event;
 				break;
 			}

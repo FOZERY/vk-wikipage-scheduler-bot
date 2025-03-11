@@ -87,31 +87,41 @@ export const confirmStep: SceneStepWithDependencies<
 		lastUpdaterId: context.senderId,
 	});
 
-	if (result.isErr()) {
-		if (result.error instanceof DatabaseConstraintError) {
+	result
+		.asyncMap(async () => {
 			logStep(
 				context,
-				`User ${context.senderId} -> database constraint error while creating event`,
-				"warn",
-				result.error
+				`User ${context.senderId} -> created event`,
+				{
+					event: context.scene.state.event,
+				},
+				"info"
 			);
+			await context.send("Событие успешно создано");
+			logStep(context, `User ${context.senderId} -> passed confirm step`, "info");
+			return await context.scene.leave();
+		})
+		.mapErr(async (error) => {
+			if (error instanceof DatabaseConstraintError) {
+				logStep(
+					context,
+					`User ${context.senderId} -> database constraint error while creating event`,
+					"warn",
+					error
+				);
 
-			return await context.send(
-				"Ошибка при создании события: Событие на это время и место уже существует."
-			);
-		} else {
-			logStep(
-				context,
-				`User ${context.senderId} -> validation error while creating event`,
-				"error",
-				result.error
-			);
+				return await context.send(
+					"Ошибка при создании события: Событие на это время и место уже существует."
+				);
+			} else {
+				logStep(
+					context,
+					`User ${context.senderId} -> validation error while creating event`,
+					"error",
+					error
+				);
 
-			return await context.send("Ошибка сервиса.");
-		}
-	}
-
-	logStep(context, `User ${context.senderId} -> passed confirm step`, "info");
-	await context.send("Событие успешно создано");
-	return await context.scene.leave();
+				return await context.send("Ошибка сервиса.");
+			}
+		});
 };

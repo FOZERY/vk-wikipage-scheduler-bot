@@ -39,6 +39,14 @@ export const findEventStep: SceneStepWithDependencies<
 			}
 			case "selectEvent": {
 				context.scene.state.event = context.messagePayload.event;
+				logStep(
+					context,
+					`User ${context.senderId} -> selected event`,
+					{
+						event: context.scene.state.event,
+					},
+					"info"
+				);
 				break;
 			}
 			default: {

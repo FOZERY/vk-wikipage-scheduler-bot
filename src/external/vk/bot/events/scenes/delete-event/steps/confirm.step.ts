@@ -76,18 +76,27 @@ export const confirmStep: SceneStepWithDependencies<
 		context.scene.state.event.id
 	);
 
-	if (result.isErr()) {
-		logStep(
-			context,
-			`User ${context.senderId} -> error while deleting event`,
-			"error",
-			result.error
-		);
-		return await context.send("Ошибка сервера.");
-	}
-
-	await context.send("Событие успешно удалено.");
-
-	logStep(context, `User ${context.senderId} -> passed confirm step`, "info");
-	return await context.scene.leave();
+	return await result
+		.asyncMap(async () => {
+			logStep(
+				context,
+				`User ${context.senderId} -> deleted event`,
+				{
+					event: context.scene.state.event,
+				},
+				"info"
+			);
+			await context.send("Событие успешно удалено.");
+			logStep(context, `User ${context.senderId} -> passed confirm step`, "info");
+			return await context.scene.leave();
+		})
+		.mapErr(async (error) => {
+			logStep(
+				context,
+				`User ${context.senderId} -> error while deleting event`,
+				"error",
+				error
+			);
+			return await context.send("Ошибка сервера.");
+		});
 };

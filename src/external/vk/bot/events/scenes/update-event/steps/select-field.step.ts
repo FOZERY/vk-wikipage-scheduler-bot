@@ -102,45 +102,67 @@ export const selectFieldStep: SceneStepWithDependencies<
 					lastUpdaterId: context.senderId,
 				});
 
-				if (result.isErr()) {
-					if (result.error === "Event not found") {
+				return await result
+					.asyncMap(async () => {
 						logStep(
 							context,
-							`User ${context.senderId} -> event not found in confirm step of update scene`,
-							"warn"
+							`User ${context.senderId} -> updated event`,
+							{
+								event: context.scene.state.event,
+							},
+							"info"
 						);
-
-						return await context.send("Событие не найдено.");
-					}
-
-					if (result.error instanceof DatabaseConstraintError) {
+						await context.send("Событие успешно обновлено.");
 						logStep(
 							context,
-							`User ${context.senderId} -> database constraint error in confirm step of update scene`,
-							"warn",
-							result.error
+							`User ${context.senderId} -> passed select-field step`,
+							"info"
 						);
+						return await context.scene.leave();
+					})
+					.mapErr(async (error) => {
+						if (error === "Event not found") {
+							logStep(
+								context,
+								`User ${context.senderId} -> event not found in confirm step of update scene`,
+								{
+									event: context.scene.state.event,
+								},
+								"warn"
+							);
 
-						return await context.send(
-							"Ошибка при обновлении события: Событие на это время и место уже существует."
-						);
-					}
+							return await context.send("Событие не найдено.");
+						}
 
-					if (result.error instanceof ValidationError) {
-						logStep(
-							context,
-							`User ${context.senderId} -> validation error in confirm step of update scene`,
-							"error",
-							result.error
-						);
-						return await context.send("Ошибка сервиса.");
-					}
-				}
+						if (error instanceof DatabaseConstraintError) {
+							logStep(
+								context,
+								`User ${context.senderId} -> database constraint error in confirm step of update scene`,
+								{
+									event: context.scene.state.event,
+								},
+								"warn",
+								error
+							);
 
-				await context.send("Событие успешно обновлено.");
+							return await context.send(
+								"Ошибка при обновлении события: Событие на это время и место уже существует."
+							);
+						}
 
-				logStep(context, `User ${context.senderId} -> passed select-field step`, "info");
-				return await context.scene.leave();
+						if (error instanceof ValidationError) {
+							logStep(
+								context,
+								`User ${context.senderId} -> validation error in confirm step of update scene`,
+								{
+									event: context.scene.state.event,
+								},
+								"error",
+								error
+							);
+							return await context.send("Ошибка сервиса.");
+						}
+					});
 			}
 			default: {
 				logStep(
