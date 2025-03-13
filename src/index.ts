@@ -78,7 +78,7 @@ vk.hear(
 );
 
 vk.hearOnFallback(async (context) => {
-	logger.warn(
+	logger.info(
 		{
 			context: getContextPartForLogging(context),
 		},
