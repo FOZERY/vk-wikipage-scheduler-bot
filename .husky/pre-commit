@@ -1,4 +1,2 @@
-pnpm format
-pnpm lint:fix
+lint-staged
 pnpm type-check
-pnpm audit
