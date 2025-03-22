@@ -14,8 +14,7 @@
 		"supabase:stop": "supabase stop",
 		"inspect": "node --inspect --env-file=./env/.env.development ./dist/index.js",
 		"format": "biome format --write",
-		"lint:check": "biome lint",
-		"lint:fix": "biome lint --write",
+		"lint": "biome lint --write",
 		"type-check": "tsc --noEmit",
 		"pretest": "tsc --noEmit",
 		"test": "tsx --no-warnings --test ./src/**/*.test.ts",
@@ -58,7 +57,7 @@
 	"lint-staged": {
 		"*.{js,ts}": [
 			"pnpm format",
-			"pnpm lint:fix"
+			"pnpm lint"
 		]
 	}
 }
