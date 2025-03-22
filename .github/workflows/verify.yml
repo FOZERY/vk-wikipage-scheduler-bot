@@ -50,7 +50,7 @@ jobs:
         run: pnpm format
 
       - name: Lint
-        run: pnpm lint:fix
+        run: pnpm lint
 
       - name: Type check
         run: pnpm type-check
