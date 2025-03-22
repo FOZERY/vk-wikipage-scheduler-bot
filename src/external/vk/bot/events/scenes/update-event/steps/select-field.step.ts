@@ -1,5 +1,5 @@
-import assert from "node:assert";
 import dayjs from "dayjs";
+import assert from "node:assert";
 import type { MessageContext } from "vk-io";
 import { DatabaseConstraintError, ValidationError } from "../../../../../../../shared/errors.js";
 import {
@@ -67,7 +67,6 @@ export const selectFieldStep: SceneStepWithDependencies<
 				return await context.scene.step.previous();
 			}
 			case SelectFieldKeyboardCommand.SelectField: {
-				const payload = context.messagePayload as SelectFieldKeyboardPayload;
 				switch (payload.field) {
 					case SelectField.Date: {
 						return await context.scene.step.go(UpdateEventSceneStepNumber.UpdateDate);

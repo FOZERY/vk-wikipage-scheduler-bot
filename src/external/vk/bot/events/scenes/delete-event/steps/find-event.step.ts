@@ -5,7 +5,10 @@ import {
 } from "../../../../shared/utils/keyboard-utils.js";
 import { logStep } from "../../../../shared/utils/logger-messages.js";
 import type { SceneStepWithDependencies } from "../../../../shared/utils/scene-utils.js";
-import { selectEventKeyboard } from "../../../keyboards/select-event.keyboard.js";
+import {
+	selectEventKeyboard,
+	type SelectEventKeyboardPayload,
+} from "../../../keyboards/select-event.keyboard.js";
 import type { DeleteEventSceneDependencies, DeleteEventSceneState } from "../delete-event.scene.js";
 
 export const findEventStep: SceneStepWithDependencies<
@@ -38,15 +41,34 @@ export const findEventStep: SceneStepWithDependencies<
 				return await context.scene.leave();
 			}
 			case "selectEvent": {
-				context.scene.state.event = context.messagePayload.event;
+				const { eventId } = context.messagePayload as SelectEventKeyboardPayload;
 				logStep(
 					context,
-					`User ${context.senderId} -> selected event`,
+					`User ${context.senderId} -> selected event with id ${eventId}`,
 					{
 						event: context.scene.state.event,
 					},
 					"info"
 				);
+
+				const event = await context.dependencies.eventsService.findEventById(eventId);
+
+				if (!event) {
+					logStep(context, `User ${context.senderId} -> event not found`, "info");
+					return await context.reply("Событие не найдено.");
+				}
+
+				context.scene.state.event = {
+					id: event.id,
+					title: event.title,
+					date: event.date,
+					timeRange: event.timeRange,
+					place: event.place,
+					organizer: event.organizer,
+					createdAt: event.createdAt,
+					updatedAt: event.updatedAt,
+					lastUpdaterId: event.lastUpdaterId,
+				};
 				break;
 			}
 			default: {
