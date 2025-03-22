@@ -44,16 +44,33 @@ export const findEventStep: SceneStepWithDependencies<
 				return await context.scene.leave();
 			}
 			case "selectEvent": {
-				const { event } = context.messagePayload as SelectEventKeyboardPayload;
+				const { eventId } = context.messagePayload as SelectEventKeyboardPayload;
+
 				logStep(
 					context,
-					`User ${context.senderId} -> selected event`,
+					`User ${context.senderId} -> selected event with id ${eventId}`,
 					{
-						event,
+						eventId,
 					},
 					"info"
 				);
-				context.scene.state.event = event;
+				const event = await context.dependencies.eventsService.findEventById(eventId);
+
+				if (!event) {
+					return await context.reply("Событие не найдено.");
+				}
+
+				context.scene.state.event = {
+					id: event.id,
+					title: event.title,
+					date: event.date,
+					place: event.place,
+					timeRange: event.timeRange,
+					organizer: event.organizer,
+					createdAt: event.createdAt,
+					updatedAt: event.updatedAt,
+					lastUpdaterId: event.lastUpdaterId,
+				};
 				break;
 			}
 			default: {

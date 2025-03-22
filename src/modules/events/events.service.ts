@@ -25,6 +25,14 @@ export class EventsService {
 		this.logger = logger.child({ context: "events-service" });
 	}
 
+	public async findEventById(id: number): Promise<EventEntity | null> {
+		this.logger.info(`EventsService -> findEventById with id '${id}' executed`);
+
+		const event = await this.eventsRepository.getById(id);
+
+		return event;
+	}
+
 	public async findEventsByTitleOrDate(searchString: string) {
 		this.logger.info(
 			`EventsService -> findEventsByTitleOrDate with searchString '${searchString}' executed`

@@ -1,6 +1,7 @@
 import "./shared/dayjs.init.js";
 
 import { setTimeout as sleep } from "node:timers/promises";
+import { MessageContext } from "vk-io";
 import { ENV } from "./config.js";
 import { getScheduleCronJob } from "./external/cron/renderCron.js";
 import { logger } from "./external/logger/pino.js";
@@ -25,14 +26,17 @@ const vk = new VKExtend({
 	preventChat: true,
 	hearEvents: ["message_new"],
 	errorHandler: async (error, context) => {
-		logger.fatal(
+		logger.error(
 			{
 				error: error,
 				context: context,
 			},
 			"VK bot -> top error handler middleware executed"
 		);
-		await gracefulShutdown(true);
+		if (context && context instanceof MessageContext) {
+			await context.send("Произошла ошибка сервера, попробуйте позже");
+		}
+		// await gracefulShutdown(true);
 	},
 });
 

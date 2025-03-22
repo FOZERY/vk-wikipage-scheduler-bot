@@ -1,11 +1,10 @@
 import dayjs from "dayjs";
 import { Keyboard } from "vk-io";
 import type { EventEntity } from "../../../../../modules/events/event.entity.js";
-import type { ViewEvent } from "../../shared/types/common.types.js";
 
 export type SelectEventKeyboardPayload = {
 	command: string;
-	event: ViewEvent;
+	eventId: number;
 };
 
 export const selectEventKeyboard = (events: EventEntity[]) => {
@@ -22,15 +21,7 @@ export const selectEventKeyboard = (events: EventEntity[]) => {
 			color: Keyboard.POSITIVE_COLOR,
 			payload: {
 				command: "selectEvent",
-				event: {
-					id: event.id,
-					title: event.title,
-					date: event.date,
-					place: event.place,
-					timeRange: event.timeRange,
-					organizer: event.organizer,
-					// lastUpdaterId: event.lastUpdaterId,
-				},
+				eventId: event.id,
 			} as SelectEventKeyboardPayload,
 		});
 		keyboard.row();
