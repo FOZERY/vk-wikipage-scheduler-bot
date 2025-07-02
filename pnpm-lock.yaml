@@ -12,71 +12,71 @@ importers:
   .:
     dependencies:
       '@logtail/pino':
-        specifier: ^0.5.2
+        specifier: ~0.5.2
         version: 0.5.2(pino@9.6.0)
       '@vk-io/authorization':
-        specifier: ^1.4.1
+        specifier: ~1.4.1
         version: 1.4.1(vk-io@4.9.1)
       '@vk-io/hear':
-        specifier: ^1.1.1
+        specifier: ~1.1.1
         version: 1.1.1(vk-io@4.9.1)
       '@vk-io/scenes':
-        specifier: ^1.2.1
+        specifier: ~1.2.1
         version: 1.2.1(vk-io@4.9.1)
       '@vk-io/session':
-        specifier: ^2.2.1
+        specifier: ~2.2.1
         version: 2.2.1(vk-io@4.9.1)
       '@vkid/sdk':
-        specifier: ^2.4.1
+        specifier: ~2.4.1
         version: 2.4.1
       cron:
-        specifier: ^3.5.0
+        specifier: ~3.5.0
         version: 3.5.0
       dayjs:
-        specifier: ^1.11.13
+        specifier: ~1.11.13
         version: 1.11.13
       drizzle-orm:
-        specifier: ^0.39.2
+        specifier: ~0.39.2
         version: 0.39.3(postgres@3.4.5)
       neverthrow:
-        specifier: ^8.1.1
+        specifier: ~8.1.1
         version: 8.1.1
       pino:
-        specifier: ^9.6.0
+        specifier: ~9.6.0
         version: 9.6.0
       pino-pretty:
-        specifier: ^13.0.0
+        specifier: ~13.0.0
         version: 13.0.0
       postgres:
-        specifier: ^3.4.5
+        specifier: ~3.4.5
         version: 3.4.5
       vk-io:
-        specifier: ^4.9.1
+        specifier: ~4.9.1
         version: 4.9.1
       zod:
-        specifier: ^3.24.2
+        specifier: ~3.24.2
         version: 3.24.2
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
       '@types/node':
-        specifier: ^22.10.10
-        version: 22.13.4
+        specifier: 22.10.10
+        version: 22.10.10
       husky:
-        specifier: ^9.1.7
+        specifier: ~9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^15.5.0
+        specifier: ~15.5.0
         version: 15.5.0
       supabase:
-        specifier: ^2.15.8
+        specifier: ~2.15.8
         version: 2.15.8
       tsx:
-        specifier: ^4.19.2
+        specifier: ~4.19.2
         version: 4.19.2
       typescript:
-        specifier: ^5.7.3
+        specifier: ~5.7.3
         version: 5.7.3
 
 packages:
@@ -325,8 +325,8 @@ packages:
   '@types/luxon@3.4.2':
     resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==}
 
-  '@types/node@22.13.4':
-    resolution: {integrity: sha512-ywP2X0DYtX3y08eFVx5fNIw7/uIv8hYUKgXoK8oayJlLnKcRfEYCxWMVE1XagUdVtCJlZT1AU4LXEABW+L1Peg==}
+  '@types/node@22.10.10':
+    resolution: {integrity: sha512-X47y/mPNzxviAGY5TcYPtYL8JsY3kAq2n8fMmKoRCxq/c4v4pyGNCzM2R6+M5/umG4ZfHuT+sgqDYqWc9rJ6ww==}
 
   '@types/stack-trace@0.0.33':
     resolution: {integrity: sha512-O7in6531Bbvlb2KEsJ0dq0CHZvc3iWSR5ZYMtvGgnHA56VgriAN/AU2LorfmcvAl2xc9N5fbCTRyMRRl8nd74g==}
@@ -833,6 +833,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -1352,7 +1353,7 @@ snapshots:
 
   '@types/luxon@3.4.2': {}
 
-  '@types/node@22.13.4':
+  '@types/node@22.10.10':
     dependencies:
       undici-types: 6.20.0
 

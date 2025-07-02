@@ -1,0 +1,9 @@
+node_modules
+.git
+.gitignore
+*.md
+dist
+.husky
+env
+supabase
+.github
