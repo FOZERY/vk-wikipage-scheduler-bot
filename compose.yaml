@@ -1,0 +1,7 @@
+services:
+    vk-bot:
+        build: .
+        container_name: vk-bot
+        restart: unless-stopped
+        env_file:
+            - ./env/.env.production
